@@ -1,0 +1,156 @@
+---
+title: DS6371 Week 1 FLS
+author: Eric Graham
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+    reference_doc: presentation.pptx
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1: Quick Quiz Questions
+
+1. b
+
+2. a
+
+3. d
+
+## 2: Randomized Experiment vs. Random Sample
+
+A randomized experiment is one in which the participants are selected at random
+from the population of interest (a random sample), and the allocation of test
+subjects to treatment or control groups is also randomized (random assignment).
+Conclusions drawn from such an experiment can make causal statements and can be
+inferred to the population.
+
+In an observational study you can't make causal inferences because you have no
+ability to randomly assign the study participants to a treatment or control
+group. Causal inferences are only made under randomized experiments. You can
+make inferences to the population, but only if the study sample was randomly
+selected from that population.
+
+## 3: Literary Digest Presidential Poll
+
+The desired population of interest for this study would be all eligible voters
+in the United States. The three sample sources that Literary Digest used in the
+survey didn't create a random sample, and likely skewed their results in favor
+of Landon:
+
+1. Subscribers to the magazine are a very small segment of the desired
+population. They may have an ideological predisposition towards Landon, and they
+may be economically distinct from the population at large (in that they could
+afford to subscribe to a literary magazine in the middle of the Great
+Depression).
+2. Phone number records may have also biased the sample towards wealthier
+voters, as phones were not as commonly-owned in 1936 as they would be in the
+future.
+3. Automobile registration may also have biased the sample towards wealthier
+voters (again, car ownership was not as widespread in 1936 as it is today).
+
+In all three sample sources, there is also an element of self-selection bias, in
+that the poll was conducted by way of a mail-in postcard.
+
+## 4: Scope of Inference for Fertilizer
+
+### Study Design 1: Discount the New Fertilizer to Existing Customers
+
+In this study design the assignment of participants wasn't obtained randomly,
+nor was the sample obtained randomly. There is selection bias in that farmers
+opt in to purchasing the discounted fertilizer (they assign themselves to the
+treatment or control group), and they also opt in to completing the crop yield
+survey (they assign themselves to the sample). In the diagram on Page 9 of our
+textbook, this study design is firmly located in the area in which we can make
+no causal inferences to the sample, or inferences to the population.
+
+### Study Design 2: Randomly Shipping the Old or New Fertilizer
+
+This study design randomly assigns subjects to the treatment or control group,
+but (as with the first study design) it introduces selection bias because the
+farmers opt in to completing the crop yield survey. In the diagram on Page 9 of
+our textbook, we see that causal inferences can be drawn, but we can't make
+inferences to the population.
+
+## 5: Creativity Study Permutation Test
+
+The creativity study seeks to measure whether intrinsic or extrinsic motivations
+have any influence on creativity, specifically with regards to creative writing.
+47 students with extensive creative writing experience were randomly assigned to
+two treatment groups, and eaach group was given a different questionnaire. Both
+questionnaires asked the students to rank the personal importance of various
+motivations for writing. One questionnaire only included extrinsic motivations
+(e.g. public recognition, money) and the other only included intrinsic
+motivations (e.g., self-expression, relaxation). The students were then asked to
+write a short poem, the creativity of which was evaluated on a 40-point scale by
+a panel of poets.
+
+The mean score of students from the intrinsic treatment group was 4.14 points
+higher than the mean score of students from the extrinsic treatment group. This
+gives us a P-Value of .005, which indicates that the difference in means between
+the two groups is significant, and that the intrinsic motivation questionnaire
+likely had a more positive influence on the creativity of the students than the
+extrinsic one did.
+
+These findings can't be generalized to the population at large, because our
+experiment only recruited subjects who were experienced writers. The general
+subject of motivation's effects on creativity is a vast one, but this experiment
+shows that there is likely a positive effect on creativity for those creative
+writing students whose motivations are intrinsic rather than extrinsic.
+
+## 6: Takeaways
+
+1. There is a great difference between the claims that can be made based on a
+randomized experiment as opposed to a case study, and researchers should
+exercise care in the claims they make based on the design of their research.
+2. Randomized experiments in which participants are randomly selected from the
+population at large, and in which participants are randomly assigned to
+treatment groups, enable researchers to make causal statement derived from
+statistical analysis and infer those statements to the population from which the
+sample was drawn. Case studies in which the sample is chosen at random from the
+population of interest allow us to make inferences to the population, but
+without randomized assignment of treatments we can only infer correlation, not
+causality.
+3. The P-Value is a statistical tool that enables us to measure uncertainty in
+statistical analysis: it provides a direct measure of the likelihood that a mean
+found from a sample would be the result of pure chance, and a sufficiently-low
+p-value allows us to make inferences from samples with a degree of confidence.
+
+---
+
+4. Hypothesis testing is part of the structure of a statistical test which
+involves accepting or rejecting a null hypothesis on the basis of the
+statistical significance of the the measurement taken by the data. The null
+hypothesis assumes some sort of "status quo," for example that the "mean is
+equal to x" or the "difference in means is equal to zero," which is challenged
+by the alternative hypothesis. This also influences the way in which claims
+based on statistical analysis are framed: even if we reject the null hypothesis,
+we must be careful about the way we present conclusions related to the
+alternative hypothesis (e.g., by citing a confidence interval).
+5. It is a challenge (at least it is for me, at this stage of my learning) to
+make accurate and responsible statements about the outcome of a study. The
+original purpose of the study appears to be to draw some conclusion about human
+creativity in general, but I felt the need to be cautious because even though
+the sample was randomly selected, the population of interest was so limited.
+
+## 7: Questions
+
+1. I'm still a beginner (or early-intermediate) programmer, and I'm having a
+hard time wrapping my mind around the SAS syntax. I have a much stronger grasp
+on the R code for the creativity study. At this stage should I be able to easily
+interpret statements like "paf = x[,1]||p:" or is that something advanced which
+you used for demo purposes?
+
+2. In a permutation test, is the distribution of sample means normal because of
+the central limit theorem?
+
+4. How did people conduct t-tests before they had computers to run large
+permutation tests? What is the basis/method for using a t-test in the absence of
+a permutation test? The two things seem closely related.
+
+5. Are there situations (outside of illustrating the mathematical theory) in
+which we would conduct a permutation test instead of using something like the
+t.test() function in R? I see that R has a perm.t.test() function, when would we
+use one versus the other?

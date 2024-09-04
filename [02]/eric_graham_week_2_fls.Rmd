@@ -1,0 +1,70 @@
+---
+title: "Week 2 FLS"
+author: "Eric Graham"
+date: "2024-09-03"
+output: powerpoint_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# 1: Quick Quiz Questions
+
+1. a. (true)
+2. c. (more accurate to say that the difference could plausibly be zero)
+3. d. (permutation test, though I imagine this means a lot of situations would
+call for a permutation test)
+4. The p-value is the likelihood that a result of a test statistic as extreme
+(or more extreme) than the one tested would occur due to pure chance.
+
+# 2: Concept Check from 2.13 in Asynch (New Marketing Strategy)
+
+### Question
+
+Assume you wanted to test whether a new marketing strategy is increasing the
+mean total sales per day. You sample days at random under the old marketing
+system and 10 days at random under the new marketing system and record the mean
+sales for each group. You find that the 95 percent confidence interval for the
+difference of mean sales per day (μ_new-μ_old) is ($1.23, $1.60). You note that
+the new marketing strategy would cost $5.00 per day to implement. Is this result
+statistically significant? Why? Is this study practically significant? Why?
+
+### My Answer
+
+This result is statistically significant if we found, with a 95% confidence
+level, that the mean effect of the new marketing campaign would be between $1.23
+and $1.60 per day in sales. However, that's not practically significant: our
+benchmark for practical significance is to improve sales by more than the cost
+of the new marketing campaign, and since this new campaign costs $5.00/day it
+would be impractical to implement it at a loss of $3.40 - $3.77 per day.
+
+# 3: CLT Activity from Section 2.2 of Asynch (Sleep 1 data)
+
+1. 500 samples of size 5 yields a mean of 8.025 (close to the population mean of 8.001).
+2. Values of the sample mean range from 5.24 to 10.21.
+3. Standard Deviation of the sample mean is .657.
+4. The distribution of sample means is symmetrical (a normal distribution) centered around 8 (the mean) with the majority of values very close to the center/mean (owing to the small standard deviation). 
+5. Means and standard deviations of additional distributions:
+a. For 500 samples of size 10, the mean was 7.960 and the standard deviation was .516
+b. For 500 samples of size 20, the mean was 8.013 and the standard deviation was .332
+c. For 500 samples of size 50, the mean was 8.024 and the standard deviation was .221
+6. Shape of additional distributions:
+a. Centered around the mean (approximately 8) and roughly symmetrical, but a much steeper curve than the samples of size 5.
+b. Centered around the mean (approximately 8) and roughly symmetrical, but an even steeper curve than samples of size 10.
+c. Centered around the mean (approximately 8) and roughly symmetrical, but the steepest curve yet! This large sample size really clusters our sample means around the actual mean of the population.
+7. Sample standard deviations for additional distributions:
+a. TODO, need to use latex
+b. TODO, need to use latex
+c. TODO, need to use latex
+8. The histograms of the smaller samples are much more scattered and random, but as the sample size increases the shape of the distribution becomes much closer to normal.
+9. All of the distributions are roughly symmetric and have a mean that is close to that of the population (8) but as the sample size increases the shape of the distribution becomes a much steeper curve (the standard deviation gets smaller as the sample size increases). The original population shape is roughly normal, but these samples would also tend towards being normally distributed even if the underlying population were skewed, which is explained by the central limit theorem.
+10. As the sample sizes get larger, the standard deviation of the distribution of sample means becomes smaller. 
+11. As sample size increases, the means of those samples are more and more likely to be close to the underlying population mean.
+12. Yes, this would hold true for samples taken of populations of any shape! It's truly mind-blowing, and something I'm still struggling to understand intuitively, but a sufficiently large sample of any population will be normally distributed and reflect the mean of that population; the shape of the sample means of multiple samples will be normally distributed; and the larger the sample, the more those sample means will be clustered around the population mean (the smaller the standard deviation). This is a powerful tool for unlocking the mean of a population from random sampling.
+13. For reasons I don't understand, this seems to also be true of the median (based on looking at samples of the skewed College Midwest data). The standard deviation isn't the same as that of the population, but it's a function of the population standard deviation and gets smaller with larger samples. Dr. Sadler, why is the median the same??? 
+
+# 4: Confidence Interval for Beachcomber Data
+
+# 5: American Samoa Discrimination Data
+

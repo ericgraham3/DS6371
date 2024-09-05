@@ -1,6 +1,6 @@
 ---
 title: 'Unit 2: Discrimination Randomization Test Pvalue'
-author: "Eric Graham (modification of original code by Bivin Sadler)"
+author: "Eric Graham (modification of original code by Dr. Bivin Sadler)"
 date: "9/3/2024"
 output: html_document
 ---

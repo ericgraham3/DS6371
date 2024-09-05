@@ -2,7 +2,10 @@
 title: "Week 2 FLS"
 author: "Eric Graham"
 date: "2024-09-03"
-output: powerpoint_presentation
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+    reference_doc: presentation.pptx
 ---
 
 ```{r setup, include=FALSE}
@@ -11,9 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # 1: Quick Quiz Questions
 
-1. a. (true)
-2. c. (more accurate to say that the difference could plausibly be zero)
-3. d. (permutation test, though I imagine this means a lot of situations would
+1. a (true)
+2. c (more accurate to say that the difference could plausibly be zero)
+3. d (permutation test, though I imagine this means a lot of situations would
 call for a permutation test)
 4. The p-value is the likelihood that a result of a test statistic as extreme
 (or more extreme) than the one tested would occur due to pure chance.
@@ -53,6 +56,9 @@ c. For 500 samples of size 50, the mean was 8.024 and the standard deviation was
 a. Centered around the mean (approximately 8) and roughly symmetrical, but a much steeper curve than the samples of size 5.
 b. Centered around the mean (approximately 8) and roughly symmetrical, but an even steeper curve than samples of size 10.
 c. Centered around the mean (approximately 8) and roughly symmetrical, but the steepest curve yet! This large sample size really clusters our sample means around the actual mean of the population.
+
+---
+
 7. Sample standard deviations for additional distributions:
 a. $$\frac{2.119}{\sqrt{10}} = 3.16227$$
 b. $$\frac{2.119}{\sqrt{20}} = 4.47213$$
@@ -65,6 +71,12 @@ c. $$\frac{2.119}{\sqrt{50}} = 7.07106$$
 13. For reasons I don't understand, this seems to also be true of the median (based on looking at samples of the skewed College Midwest data). The standard deviation isn't the same as that of the population, but it's a function of the population standard deviation and gets smaller with larger samples. Dr. Sadler, why is the median the same??? 
 
 # 4: Confidence Interval for Beachcomber Data
+
+## Confidence Interval Question
+
+1. I understand (in a very basic sense) that the confidence interval is constructed by taking the mean from the sample then adding and subtracting the standard error from it to give a range of plausible values. Is my understanding correct?
+
+2. I'm having a hard time wrapping my mind around the standard error as a concept, but I feel like I'm getting closer to seeing how it all fits together.
 
 # 5: American Samoa Discrimination Data
 
@@ -102,7 +114,7 @@ As was the case with the permutation test, we can express our hypotheses as:
 
 I was able to calculate our critical value using SAS, which found it to be 2.00758. This means that to meet the threshold of statistical significance our test statistic would need to be more extreme than +/- 2.00758 (which would be located in the shaded region below).
 
-!(perm-test-critical-values.png)
+![Normal distribution with our critical values shaded](perm-test-critical-values.png)
 
 ## 5b) T-Test Step 3: Find the Test Statistic
 
@@ -152,9 +164,13 @@ t.test(x = Fired, y = Not_fired, conf.int = .95, var.equal = TRUE, alternative =
 
 # 6: Takeaways
 
+1. The difference of means from two different groups in the same sample can be tested for statistical significance to give a measure of certainty about those differences.
+2. A t-test can be used to test for statistical significance for a mean or the difference of means, and relies upon determining the p-value for a statistic (the percentage of expected outcomes that would be as extreme or more extreme than the observed mean if it were determined entirely by chance).
+3. Hypothesis tests using t-tests are constructed by assuming that the observed effect doesn't exist (the null hypothesis) and testing the probability that this is not the case (the alternative hypothesis).
+4. There is a difference between statistical significance and practical significance: large sample sizes can produce very low p-values for small differences in mean, and the threshold for practical significance (e.g., are we ready to spend money on this marketing campaign?) can vary greatly from the standard for statistical significance. As data scientists we need to take care in how we communicate results so stakeholders can be more informed in their decision-making.
+
 # 7: Questions
 
 1. In the discrimination tests, why did the permutation test and t-test give the same results? When would we use one test or another? 
 2. In 5d) I got lost interpreting the confidence level of the difference of mean age, did I interpret that correctly?
-3. Conceptually, I am having a hard time understanding what the critical value, the t-value, standard error, and pooled standard deviation actually mean. I can calculate them, but what attributes of a dataset/test do they describe?
-
+3. Conceptually, I am having a hard time understanding what the critical value, the t-value, standard error, and pooled standard deviation actually mean. I can calculate them, but I can't really explain them well.

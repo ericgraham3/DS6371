@@ -6,7 +6,7 @@ output: powerpoint_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # 1: Quick Quiz Questions
@@ -67,4 +67,26 @@ c. TODO, need to use latex
 # 4: Confidence Interval for Beachcomber Data
 
 # 5: American Samoa Discrimination Data
+
+## Problem Statement
+
+A lawsuit has claimed that the government of American Samoa has systematically discriminated against employees on the basis of age by preferentially firing older workers. A sample of 51 employees' ages and their employment status (either fired or not fired) showed that the mean age of the fired group was 1.9238 years older than the mean age of the group of employees who weren't fired. I used SAS to conduct both a permutation test to determine whether the observed age difference in this sample is statistically significant.
+
+## Permutation Test: Identify H~0~ and H~a~
+
+If we assume that the data would not show any discrimination on the basis of age, then our null hypothesis would be that the mean age of those who were fired was no different from the mean age of those who were fired. On the other hand, if age discrimination were evident in the data, the the mean age of those who are fired would be different from those who were not. Throughout this test, I refer to the those who were fired as being in Group 1, and those who were not fired as being in Group 0. We can express our hypotheses as:
+
+### H~0~: $$\mu_1 - \mu_0 = 0$$
+
+### H~a~: $$\mu_1 - \mu_0 \neq 0$$
+
+## Permutation Test: Find P-Value
+
+Using SAS, I simulated 1000 permutations of our sample data to construct a distribution of the mean differences from those samples. Of those 1000 sample means, 277 were as extreme (or more extreme) than our observed difference of 1.9238. This gives us a p-value of 0.277.
+
+## Permutation Test: Statistical Conclusion and Scope of Inference
+
+The P-Value of 0.277 indicates that we fail to reject the null hypothesis: there is not sufficient statistical evidence that the difference in mean ages between the sample group that was fired and the sample group that was not fired can be attributed to anything other than chance. Because this sample was randomly drawn from the population of interest (employees in the Government of American Samoa) we can infer that these findings are representative of the population. However, because this is not a truly randomized experiment (for obvious reasons: we can't do a controlled experiment in which we randomly fire people!) we can't make causal statements.
+
+In the context of a legal proceeding, it is important to emphasize that our statistical test only shows that we can't rule out the possibility that there is no relationship between age and the likelihood of being fired. We can't make the claim that nobody was fired due to their age, or that there was no age-based discrimination. The standard of statistical significance is very specific and inherently different from the standards used to make decisions in a legal context. What we can state is that, based on this sample, we are 95% confident that we can't demonstrate statistical evidence that the difference in age can't be attributed to chance.
 

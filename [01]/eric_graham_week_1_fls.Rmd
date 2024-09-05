@@ -79,7 +79,7 @@ inferences to the population.
 The creativity study seeks to measure whether intrinsic or extrinsic motivations
 have any influence on creativity, specifically with regards to creative writing.
 47 students with extensive creative writing experience were randomly assigned to
-two treatment groups, and eaach group was given a different questionnaire. Both
+two treatment groups, and each group was given a different questionnaire. Both
 questionnaires asked the students to rank the personal importance of various
 motivations for writing. One questionnaire only included extrinsic motivations
 (e.g. public recognition, money) and the other only included intrinsic

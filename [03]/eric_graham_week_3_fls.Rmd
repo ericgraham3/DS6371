@@ -83,7 +83,7 @@ education = read.csv("EducationData.csv", header = TRUE)
 summary(education)
 ```
 
-The summary of the below data, and follwing histograms, show that the distributions of the two samples are not normal, and they have substantially different standard deviations and sample sizes. Thus, an ordinary t-test would not be valid.    
+The summary of the data, and following histograms, show that the distributions of the two samples are not normal (they are both right-skewed), and the samples have substantially different standard deviations and sample sizes. Thus, an ordinary t-test would not be valid.    
 
 ```{r, echo = TRUE, results = "markup"}
 education %>% group_by(Educ) %>% summarize(mean_income = mean(Income2005), sd_income = sd(Income2005), count = n())
@@ -102,4 +102,62 @@ education %>% ggplot(aes(x = Income2005)) +
     x = "Income",
     y = "Education Level"
   )
+```
+
+---
+
+A logarithmic transformation can be used to create a more normal distribution upon which to run our t-test. The below summary and following histograms show the effect of this transformation. The summary of the data, and the following histograms, show the two sample distributions to be much less skewed, and much closer in spread.
+
+```{r, echo = TRUE, results = "markup"}
+# logarithmic transformation on income
+education_log = education %>% mutate(log_income = log(Income2005))
+head(education_log)
+education_log %>% group_by(Educ) %>% summarize(mean_income = mean(log_income), sd_income = sd(log_income), count = n())
+```
+
+---
+
+```{r}
+education_log %>% ggplot(aes(x = log_income)) +
+  geom_histogram(color = "blue") +
+  facet_wrap(~Educ) +
+  theme_economist() +
+  scale_x_continuous(labels = scales::comma) +
+  labs(
+    title = "Log-Adjusted Income Distribution by Education Level",
+    x = "Income",
+    y = "Education Level"
+  )
+```
+
+
+---
+
+The pooled t-test on the log-transformed results shows a p-value of 2.2e-16 (0.00000000000000022), which is very strong evidence to reject the null hypothesis that there is no difference in mean income between those who completed either 12 or 16 years of education.
+
+```{r, echo = TRUE, results = "markup"}
+# pooled t-test stored as variable so we can extract and exponentiate the reported values from the confidence interval
+log_test_result = t.test(log_income ~ Educ, data = education_log, var.equal = TRUE)
+log_test_result
+```
+
+---
+
+By reversing the log-transformation that we performed on the original income data, we can accurately report a confidence interval for the expected difference in income. 
+
+```{r, echo = TRUE, results = "markup"}
+# extracting lower and upper bounds from confidence interval and exponentiating them
+str(log_test_result)
+lower_bound = log_test_result$conf.int[1]
+upper_bound = log_test_result$conf.int[2]
+reported_lower_bound = exp(lower_bound)
+reported_upper_bound = exp(upper_bound)
+reported_lower_bound
+reported_upper_bound
+```
+
+For distributions which violate so many of the standard t-tests assumptions, Welch's t-test can also be used.
+
+```{r, echo = TRUE, results = "markup"}
+t.test(Income2005 ~ Educ, data = education, var.equal = FALSE)
 ```

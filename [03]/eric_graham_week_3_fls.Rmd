@@ -12,9 +12,13 @@ output:
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = "hide")
 library(dplyr)
 library(ggplot2)
+library(ggthemes)
+library(scales)
 ```
 
-# Ritalin Effect on Eye-Twitch Speed
+# Question 1: Quick Quiz Questions
+
+# Question 2: Reaction Time Experiment
 
 ```{r}
 # read in data
@@ -71,3 +75,31 @@ There is strong evidence to suggest that there is a difference in reaction time 
 Because the test subjects were randomly allocated to the treatment group (in a double blind experiment) we can say that the evidence suggests a causal effect of the Ritalin treatment in decreasing reaction time. 
 
 However, these findings are limited to the sample participants. We can't make inferences to the population because these subjects were recruited via a newspaper ad and compensated for their participation. The sample wasn't randomly chosen, so we can't make inferences to the population based on the experiment. The strong treatment effect demonstrated does indicate that further experiments, with truly randomized samples, might be useful avenues for research.
+
+# Question 3: Education and Income
+
+```{r}
+education = read.csv("EducationData.csv", header = TRUE)
+summary(education)
+```
+
+The summary of the below data, and follwing histograms, show that the distributions of the two samples are not normal, and they have substantially different standard deviations and sample sizes. Thus, an ordinary t-test would not be valid.    
+
+```{r, echo = TRUE, results = "markup"}
+education %>% group_by(Educ) %>% summarize(mean_income = mean(Income2005), sd_income = sd(Income2005), count = n())
+```
+
+---
+
+```{r}
+education %>% ggplot(aes(x = Income2005)) +
+  geom_histogram(color = "blue") +
+  facet_wrap(~Educ) +
+  theme_economist() +
+  scale_x_continuous(labels = scales::comma) +
+  labs(
+    title = "Income Distribution by Education Level",
+    x = "Income",
+    y = "Education Level"
+  )
+```

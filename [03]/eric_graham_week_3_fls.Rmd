@@ -1,0 +1,73 @@
+---
+title: "Week 3 FLS"
+author: "Eric Graham"
+date: "2024-09-09"
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+    reference_doc: presentation.pptx
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = "hide")
+library(dplyr)
+library(ggplot2)
+```
+
+# Ritalin Effect on Eye-Twitch Speed
+
+```{r}
+# read in data
+twitch = read.csv("twitch.csv", header = TRUE)
+head(twitch)
+summary(twitch)
+
+# calculate critical values
+df = nrow(twitch) - 1
+qt(.975, df)
+
+# paired t-test
+t.test(x = twitch$Ritalin, y = twitch$Placebo, paired = TRUE)
+```
+
+## Step 1: Problem Statement / Identify H~0~ and H~a~
+
+In an effort to test the effect of the drug Ritalin on reflexes, an experiment was conducted in which 41 participants were subjected to a periodic blast of sound via headphones and the speed with which their eyes twitched in response to that sound were measured. The participants were recruited via newspaper ad and paid for their participation. The participants each came to the research site twice: on one visit they received a Ritalin treatment, and on the other they received a placebo. Neither participant nor researchers knew whether they were in the Ritalin or placebo group on a given visit.
+
+---
+
+To test whether Ritalin has any effect on the twitch time of the study participants, we will use a paired t-test. This mitigates the lack of independence in our sample and allows us to compare the mean difference between the Ritalin reactions and the placebo reaction. Since the observed data showed a mean difference of 0.09447, our null hypothesis will assume no difference, and the t-test will test the alternative hypothesis, that there is a difference between the means of the two groups. 
+
+#### H~0~: $$\mu_{\text{Ritalin}} - \mu_{\text{Placebo}} = 0$$
+
+#### H~a~: $$\mu_{\text{Ritalin}} - \mu_{\text{Placebo}} \neq 0$$
+
+## Step 2: Find the Critical Values and Draw and Shade
+
+I was able to calculate our critical value using R, which found it to be 2.021. This means that to meet the threshold of statistical significance our test statistic would need to be more extreme than +/- 2.021 (which would be located in the shaded region below).
+
+![Critical values for 95% confidence level with 40 degrees of freedom](twitch-critical-values.png)
+
+## Step 3: Find the Test Statistic
+
+Using a paired t-test in R, we find the test statistic to be 3.3565, which we can see is well within the shaded region to the right of our critical value.
+
+![Test statistic for paired t-test](twitch-t-stat.png)
+
+## Step 4: Find the P-Value
+
+R calculated the p-value for our sample, which is 0.00174. This means that there is a 0.174% chance of observing, by random chance, a result as extreme or more extreme than the observed mean difference.
+
+![P-value for paired t-test](twitch-p-value.png)
+
+## Step 5: Reject or Fail to Reject H~0~
+
+Given that our desired confidence level is 95%, we would need to see a p-value less than (or equal to) .05 to reject the null hypothesis. Our p-value (0.00174) is well below that threshold, so we reject the null hypothesis.
+
+## Step 6: Statistical Conclusion and Scope of Inference
+
+There is strong evidence to suggest that there is a difference in reaction time between the Ritalin and Placebo groups, with a p-value of 0.00174. We are 95% confident that the mean difference in reaction times between the Placebo group and Ritalin group is between 0.03758528 and 0.15135473.
+
+Because the test subjects were randomly allocated to the treatment group (in a double blind experiment) we can say that the evidence suggests a causal effect of the Ritalin treatment in decreasing reaction time. 
+
+However, these findings are limited to the sample participants. We can't make inferences to the population because these subjects were recruited via a newspaper ad and compensated for their participation. The sample wasn't randomly chosen, so we can't make inferences to the population based on the experiment. The strong treatment effect demonstrated does indicate that further experiments, with truly randomized samples, might be useful avenues for research.

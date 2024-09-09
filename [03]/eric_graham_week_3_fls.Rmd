@@ -167,7 +167,7 @@ Because this is an observational study (as it's impractical to randomly assign p
 
 ```{r, echo = TRUE, results = "markup"}
 # extracting lower and upper bounds from confidence interval and exponentiating them
-str(log_test_result)
+# str(log_test_result)
 lower_bound = log_test_result$conf.int[1]
 upper_bound = log_test_result$conf.int[2]
 reported_lower_bound = exp(lower_bound)
@@ -175,6 +175,8 @@ reported_upper_bound = exp(upper_bound)
 reported_lower_bound
 reported_upper_bound
 ```
+
+---
 
 For distributions which violate so many of the standard t-tests assumptions, Welch's t-test can also be used.
 

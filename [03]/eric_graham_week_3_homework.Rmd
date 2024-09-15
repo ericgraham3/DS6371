@@ -35,17 +35,22 @@ Two analyze the discrimination data with respect to the assumptions of a two-sam
 
 ```{r}
 discrimination = read.csv("discrimination.csv")
-fired = discrimination %>% filter(fired == 1)
-sd(fired$age)
-hist(fired$age, main = "Distribution of Age - Fired", xlab = "Age")
-not_fired = discrimination %>% filter(fired == 0)
-sd(not_fired$age)
-hist(not_fired$age, main = "Distribution of Age - Not Fired", xlab = "Age")
+discrimination$fired = factor(discrimination$fired, levels = c(0, 1), labels = c("not fired", "fired"))
+discrimination %>% group_by(fired) %>% summarize(sd = sd(age))
+discrimination %>% ggplot(aes(x = age, y = fired)) +
+  geom_boxplot(color = "blue") + 
+  theme_economist() +
+  labs(title = "Distributions of Age", x = "Age", y = "") 
+  
+# fired = discrimination %>% filter(fired == 1)
+# sd(fired$age)
+# hist(fired$age, main = "Distribution of Age - Fired", xlab = "Age")
+# not_fired = discrimination %>% filter(fired == 0)
+# sd(not_fired$age)
+# hist(not_fired$age, main = "Distribution of Age - Not Fired", xlab = "Age")
 ```
 
-Though the different bins in the R histogram lead to slightly different visualizations, the general shape matches that shown in SAS, and the standard deviations match those shown by SAS.
-
-
+The above boxplots confirm what was seen in the SAS histogram: that neither variable is normally distributed, and that there is much more variance in the "not fired" group. The difference in spread is confirmed by the standard deviations, which match those calculated in SAS. 
 
 ## 1c) Complete Analysis of Data
 
@@ -85,20 +90,21 @@ cash %>% group_by(School) %>% summarize(mean = mean(Cash))
 cash %>% group_by(School) %>% summarize(sd = sd(Cash))
 cash %>% ggplot(aes(x = School, y = Cash)) +
   geom_boxplot(color = "blue") +
+  theme_economist() +
   labs(title = "Distributions of Cash on Hand", x = "School", y = "Cash") 
 ```
 
-* __Normality:__ as shown in the above histogram, neither group is normally distributed: both are right-skewed, with SMU having a long tail.
-* __Standard Deviation:__ R shows that the two samples do not have the same standard deviation, which can create misleading results when the samples aren't the same size (as is the case here).
+* __Normality:__ as shown in the above histogram, neither group is normally distributed: both are right-skewed, with SMU having a very long tail.
+* __Standard Deviation:__ R shows that the two samples have significantly different standard deviations, which can create misleading results when the samples aren't the same size (as is the case here).
 * __Independence__: by their nature, these samples are independent.
-* __Outliers__: as noted above, the SMU group has some outliers, including one with $1200 on hand!
+* __Outliers__: as noted above, the SMU group has some outliers, including an extreme one with $1200 on hand!
 * __Other Assumptions:__ the observations are quantitative, but there are issues with the way the samples were drawn and a question as to whether they are representative (discussed below in our conclusion)
 
 ## 2b: Complete Analysis
 
 ### Permutation Test 1: Problem Statement
 
-As part of an investigation to see whether the school's vending machines should accept bills and coins, students in a Business Stats class at SMU were polled to see how much cash they had on hand at that very moment. A professor from Seattle University conducted a similar poll the year before. We compared these two samples to see whether there is any evidence that the mean cash on hand of SMU students is different from the mean cash on hand of Seattle University students. In our samples, the SMU mean pocket cash was $79.125, while the observed Seattle U mean pocket cash was $27.
+As part of an investigation to see whether the school's vending machines should accept bills and coins, students in a Business Stats class at SMU were polled to see how much cash they had on hand at that very moment. A professor from Seattle University conducted a similar poll the year before. We compared these two samples to see whether there is any evidence that the mean cash on hand of SMU students is different from the mean cash on hand of Seattle University students. In our samples, the SMU mean pocket cash was $141.62, while the observed Seattle U mean pocket cash was $27.
 
 ### Permutation Test 2: T-Test Assumptions
 
@@ -114,19 +120,9 @@ H~A~: $\mu_{SMU} - \mu_{Seattle} \neq 0$
 
 ### Permutation Test 3: Find P-Value
 
-The permutation test randomly generated 1000 possible arrangements of those samples using the same data, but reassigning the amounts of cash on hand among the test subjects at the two schools. We then calculated the difference of means between those permuted samples and determined what proportion of those permutations featured sample mean differences as extreme (or more extreme) as ours. This proportion is our p-value, which was found to be .1456.
-
-This is to say that, of 1000 randomly permuted samples, 14.56% of them exhibited a difference in mean which was as extreme (or more extreme) than the difference that we observed. To meet a 95% confidence level in our observed difference, we would have needed to see a p-value of .05 or less.
-
-### Permutation Test 4 and 5: Statistical Conclusion and Scope of Inference
-
-Thus, our conclusion is that we fail to reject the null hypothesis: the data we have isn't sufficient to suggest that there is a difference in the mean amount of cash carried by students at SMU and Seattle U.
-
-These findings are limited to the samples provided: we can't make inferences to the general populations of these schools because the samples weren't drawn at random. There are any number of confounding variables that could affect why the mean pocket cash of students in a given Business Stats class might differ from that of the student body at large. To make inferences to the larger population we would need to randomly select students from each school to report the amount of cash they have on hand, at which point we could analyze that data to see if a statistically-significant difference in cash on hand would emerge.
-
 ```{r}
 xbars = cash %>% group_by(School) %>% summarize(mean = mean(Cash))
-xbarNminusT = xbars[1,2] - xbars[2,2] # observed difference xbarSMU - xbarSeattle = 52.125
+xbarNminusT = xbars[1,2] - xbars[2,2] # observed difference xbarSMU - xbarSeattle = 114.62
 xbarNminusT
 
 set.seed(2) # So we all get the same randomizations and thus the same values ... comment this out to see how the result changes based on the randomization.
@@ -159,13 +155,84 @@ g = df %>% ggplot(mapping = aes(x = xbarDiffs)) +
 g
 
 # count how many differences of sample means from our 10000 permutations are greater than the observed difference from our original sample and store in the variable num_more_extreme
-num_more_extreme = sum((abs(xbarDiffHolder)) >= 52.125)
+num_more_extreme = sum((abs(xbarDiffHolder)) >= 114.62)
 num_more_extreme
 
 # divide num_more_extreme by 10000, the number of permutations we created, to derive the p-value (which is the percentage of differences of sample means that were as extreme, or more extreme, than the observed difference)
 pvalue = num_more_extreme / 10000
 pvalue
 ```
+
+The permutation test randomly generated 10000 possible arrangements of those samples using the same data, but reassigning the amounts of cash on hand among the test subjects at the two schools. We then calculated the difference of means between those permuted samples and determined what proportion of those permutations featured sample mean differences as extreme (or more extreme) as ours. This proportion is our p-value, which was found to be .1562.
+
+This is to say that, of 10000 randomly permuted samples, 15.62% of them exhibited a difference in mean which was as extreme (or more extreme) than the difference that we observed. To meet a 95% confidence level in our observed difference, we would have needed to see a p-value of .05 or less.
+
+### Permutation Test 4 and 5: Statistical Conclusion and Scope of Inference
+
+Thus, our conclusion is that we fail to reject the null hypothesis: the data we have isn't sufficient to suggest that there is a difference in the mean amount of cash carried by students at SMU and Seattle U.
+
+These findings are limited to the samples provided: we can't make inferences to the general populations of these schools because the samples weren't drawn at random. There are any number of confounding variables that could affect why the mean pocket cash of students in a given Business Stats class might differ from that of the student body at large. To make inferences to the larger population we would need to randomly select students from each school to report the amount of cash they have on hand, at which point we could analyze that data to see if a statistically-significant difference in cash on hand would emerge.
+
+## 2c: Outlier Analysis
+
+As noted above, there is an extreme outlier in the SMU dataset ($1200). I removed this outlier from the dataset to see how it affects the analysis and testing.
+
+```{r}
+cash = read.csv("Cash2.csv")
+cash %>% group_by(School) %>% summarize(mean = mean(Cash))
+cash %>% group_by(School) %>% summarize(sd = sd(Cash))
+cash %>% ggplot(aes(x = School, y = Cash)) +
+  geom_boxplot(color = "blue") +
+  theme_economist() +
+  labs(title = "Distributions of Cash on Hand\n (No Outlier)", x = "School", y = "Cash") 
+```
+
+Without the outlier, the observed mean difference is smaller (44.07). While the standard deviations are closer, they are still substantially different, and the above boxplot shows that the SMU group still has a longer tail (more right-skewed than the Seattle U data). This doesn't affect my decision about the appropriateness of the t-tools: the non-normality of the distribution, combined with the significant differences in spread, mean that a t-test isn't appropriate for this data.
+
+```{r}
+xbars = cash %>% group_by(School) %>% summarize(mean = mean(Cash))
+xbarNminusT = xbars[1,2] - xbars[2,2] # observed difference xbarSMU - xbarSeattle = 114.62
+xbarNminusT
+
+set.seed(2) # So we all get the same randomizations and thus the same values ... comment this out to see how the result changes based on the randomization.
+
+# create variable to hold the difference in means for all of our sample distributions
+xbarDiffHolder = numeric(10000)
+
+# for loop runs 10000 times to "shuffle" the labels in our dataset, calculate the mean of the permuted dataset (grouped by school),
+# calculate the difference between the two schools, and then store that difference in the xbarDiffHolder variable
+for (i in 1:10000)
+{
+  scrambledLabels = sample(cash$School,29); #shuffle the Labels
+  
+  cashTemp = cash
+  cashTemp$School = scrambledLabels
+  
+  xbars = cashTemp %>% group_by(School) %>% summarize(mean = mean(Cash))
+  xbarNminusT = xbars[1,2] - xbars[2,2] # observed difference xbarIntrinsic - xbarExtrinsic = 21.16667
+  xbarNminusT
+  xbarDiffHolder[i] = xbarNminusT$mean
+  
+}
+
+# create data from from xbarDiffHolder and generate a histogram showing the distribution of the difference of sample means
+df = data.frame(xbarDiffs = xbarDiffHolder)
+
+g = df %>% ggplot(mapping = aes(x = xbarDiffs)) + 
+  geom_histogram(bins = 25, fill = "cornflowerblue", linewidth = 0.1) +
+  ggtitle("Histogram of the Permutation Distribution of the Difference of Sample Means Scores")
+g
+
+# count how many differences of sample means from our 10000 permutations are greater than the observed difference from our original sample and store in the variable num_more_extreme
+num_more_extreme = sum((abs(xbarDiffHolder)) >= 44.07)
+num_more_extreme
+
+# divide num_more_extreme by 10000, the number of permutations we created, to derive the p-value (which is the percentage of differences of sample means that were as extreme, or more extreme, than the observed difference)
+pvalue = num_more_extreme / 10000
+pvalue
+```
+
+Running the permutation test without the $1200 outlier provides a p-value of .253, which is still large enough to reject the null hypothesis. Based on the flowchart from Page 69 of our textbook, this means that we would report results of the test which included the outlier. Had the removal of the outlier brought the p-value below .05, then further scrutiny would be warranted.
 
 # Question 3: Education and Income
 
@@ -217,7 +284,7 @@ education_log %>% ggplot(aes(x = log_income)) +
   theme_economist() +
   scale_x_continuous(labels = scales::comma) +
   labs(
-    title = "Log-Adjusted Income Distribution by Education Level",
+    title = "Log-Adjusted Income\n Distribution by Education Level",
     x = "Income",
     y = "Education Level"
   )

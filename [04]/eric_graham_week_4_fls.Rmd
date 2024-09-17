@@ -1,0 +1,76 @@
+---
+title: "Week 4 FLS"
+author: "Eric Graham"
+date: "2024-09-17"
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+    reference_doc: presentation.pptx
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = "hide")
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(scales)
+```
+
+# 1: Quick Quiz Questions
+
+## QQQ 1
+
+1. D
+2. C
+3. B
+4. A
+5. E
+
+## QQQ 2
+
+A, C, F, H
+
+## QQQ 3
+
+A t-test on the difference in means between the log income for the two groups would be more powerful. Welch's t-test is designed to account for samples with high variance, so it sacrifices some power to do so. In this case, since the log-transformed data produced normal distributions with similar variance and spread, we can use a pooled t-test which is more powerful.
+
+## QQQ 4
+
+# 2: Reaction Time Experiment
+
+## Power Test in R
+
+```{r, echo=TRUE}
+power.t.test(n = 250, delta = 5, sd = 25, type = "paired", alternative = "two.sided", sig.level = .05)
+```
+
+## Answers
+
+1. The probability that our test will make a mistake and reject the null hypothesis if it's true is alpha, or significance level, which is given as 0.05.
+2. This would be a Type I error.
+3. If the true mean is 107, then the effect size is 5.
+4. The probability that our test will make the correct decision and reject the null hypothesis is 0.8829952.
+5. "Power" is the statistical term for this value.
+6. ![ATTACH DRAWING]()
+
+# 3: Recall the Reaction Time Experiment
+
+## Power Test in R
+
+```{r, echo=TRUE}
+power.t.test(n = 41, delta = 0.07, sd = 0.2, type = "paired", alternative = "two.sided", sig.level = .05)
+```
+
+## Answers
+
+1. The probability that our test will make a mistake and reject the null hypothesis if it's true is alpha, or significance level, which is given as 0.05.
+2. The power would be .5898
+![ATTACH DRAWING]()
+3. 
+
+# 4: Recall the Creativity Study
+
+# 5: Takeaways
+
+# 6: Questions
+

@@ -1,0 +1,116 @@
+---
+title: "Week 4 Homework"
+author: "Eric Graham"
+date: "2024-09-22"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(effectsize)
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+library(pwr)
+
+fired = c(34, 37, 37, 38, 41, 42, 43, 44, 44, 45, 45, 45, 46, 48, 49, 53, 53, 54, 54, 55, 56)
+not_fired = c(27, 33, 36, 37, 38, 38, 39, 42, 42, 43, 43, 44, 44, 44, 45, 45, 45, 45, 46, 46, 47, 47, 48, 48, 49, 49, 51, 51, 52, 54)
+
+```
+
+# 1a: Difference in Mean Age
+
+If there is a difference in mean ages between the two groups but we erroneously find no difference (meaning we fail to reject the null hypothesis when it isn't true) then that would be a Type II error.
+
+# 1B: Power to Detect Difference of 2 Points
+
+I used the sd_pooled() function from the effectsize package to calculate the pooled standard deviation. For sample size I was uncertain as to whether to use the pooled sample size, half of the pooled sample size, or the smaller of the two sample sizes. I ultimately used the smaller of the two sample sizes, to err on the side of caution. I then used the power.t.test() function to find the power, which is 30.85%.
+
+```{r}
+fired = c(34, 37, 37, 38, 41, 42, 43, 44, 44, 45, 45, 45, 46, 48, 49, 53, 53, 54, 54, 55, 56)
+not_fired = c(27, 33, 36, 37, 38, 38, 39, 42, 42, 43, 43, 44, 44, 44, 45, 45, 45, 45, 46, 46, 47, 47, 48, 48, 49, 49, 51, 51, 52, 54)
+
+n_fired = length(fired)
+n_not_fired = length(not_fired)
+
+pooled_sd = sd_pooled(fired, not_fired)
+pooled_sd
+
+power.t.test(n = n_fired, delta = 2, sd = pooled_sd, sig.level = .05, type = "two.sample", alternative = "one.sided")
+```
+
+# 1C: Sample Size to Achieve 90% Power
+
+The power.t.test() function requires you to fill in all but one variable, and will then calculate that variable. By leaving out the value for "n" and plugging in .9 for "power," we see that 162.73 (so 163) sample units would be required to achieve a power of 90%.
+
+```{r}
+power.t.test(power = .9, delta = 2, sd = pooled_sd, sig.level = .05, type = "two.sample", alternative = "one.sided")
+```
+
+# 1D: Sample Size for 90% Power if Delta is 1
+
+Likewise, I changed the value of $\delta$ to 1 in the previous R code and found that 648.88 (so 649) sample units would be required to achieve a power of 90% when the $\delta$ is that small.
+
+```{r}
+power.t.test(power = .9, delta = 1, sd = pooled_sd, sig.level = .05, type = "two.sample", alternative = "one.sided")
+```
+
+# 1E: Adjust Significance Level to 1%
+
+The probability of detecting a significant result if there isn't really one (meaning that we reject the null hypothesis when it is true, a Type I error) is the significance level ($\alpha$). Changing that to .01 drastically increases the sample size required to achieve a power of 90% to 986.62 (987) sample units.
+
+```{r}
+power.t.test(power = .9, delta = 1, sd = pooled_sd, sig.level = .01, type = "two.sample", alternative = "one.sided")
+```
+
+# 1F: Diminishiing Returns on Power Curve
+
+Everyone's definition of diminishing returns will vary, but my approach was to visually examine the "cost" in sample size of each percentage point of power.The below graph shows that the going beyond 75% power comes with increasing costs.
+
+```{r}
+test_power = 0
+power_results = data.frame()
+while (test_power < 1) {
+  
+  test_results = power.t.test(power = test_power, delta = 1, sd = pooled_sd, sig.level = .01, type = "two.sample", alternative = "one.sided")
+  
+  power_results = rbind(power_results, data.frame(test_results$power, test_results$n))
+  
+  test_power = test_power + .01
+  
+}
+
+power_results %>% ggplot(aes(x = test_results.n, y = test_results.power)) +
+  geom_line() +
+  labs(title = "Power Curve", x = "Sample Size", y = "Power") +
+  theme_economist()
+
+```
+
+However, the *de facto* minimum power is generally considered to be 80%, so I wanted to analyze the relative returns for increased sample size above that threshold. Based on the below graph, power above 90% is expensive, but I would say that power above 95% truly represents the point of diminishing returns. 
+
+```{r}
+test_power = .8
+power_results = data.frame()
+while (test_power < 1) {
+  
+  test_results = power.t.test(power = test_power, delta = 1, sd = pooled_sd, sig.level = .01, type = "two.sample", alternative = "one.sided")
+  
+  power_results = rbind(power_results, data.frame(test_results$power, test_results$n))
+  
+  test_power = test_power + .01
+  
+}
+
+power_results %>% ggplot(aes(x = test_results.n, y = test_results.power)) +
+  geom_line() +
+  labs(title = "Power Curve", x = "Sample Size", y = "Power") +
+  theme_economist()
+
+```
+
+How far along the researcher/client wants to go on this curve depends on many factors, including the availability of test subjects and sensitivity to Type II errors in the specific research question.
+
+# 1G: Welch's T-Test
+
+Welch's t-test is inherently less powerful because it uses the Satterthwaite method to calculate degrees of freedom. This leads to a larger critical value and reduces the likelihood of a Type I error, but the larger critical value decreases power.

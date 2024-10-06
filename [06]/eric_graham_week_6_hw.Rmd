@@ -1,0 +1,224 @@
+---
+title: "Week 6 Homework"
+author: "Eric Graham"
+date: "2024-10-04"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+# Question 1: ANOVA on Log-Transformed Education/Income Data
+
+## 1.1: Problem Statement
+
+Given a sample of incomes and number of years of education completed, we want to determine whether there is any evidence that there is a difference in mean income between the various levels of educational achievement. The data is broken down into six groups based on the number of years completed:
+
+```{r}
+educ = read.csv("ex0525.csv", header = TRUE)
+educ_levels = educ %>%
+  distinct(Educ)
+educ_levels
+```
+
+Analysis of Variance (ANOVA) can be used here to see if there is statistical evidence that at least one of the groups has a different mean income than the others. This basic ANOVA will compare the sum of squared differences under a reduced model which assumes that the groups all share the same mean, and compare that to a full model which assumes that each group mean is independent, and provide a p-value to measure the probability that all groups share the same mean.
+
+$$ H_0 \text{ (reduced model)}: \mu_{<12} = \mu_{12} = \mu_{13-15} = \mu_{16} = \mu_{>16} $$
+
+$$ H_a \text{ (full model)}: \text{The mean of any group is different from the means of the others.} $$
+
+
+## 1.2: ANOVA Assumption
+
+The ANOVA test' relies on the groups to be normally distributed; to have the same standard deviation; and to be independent.
+
+By its nature, this data is independent.
+
+The below histograms and qqplots show that the distributions are generally right-skewed, but ANOVA is robust against violations of normality if the sample sizes are large (as is the case here).
+
+However, the ANOVA test is sensitive to violations of the standard deviation assumption, and the below histograms and qqplots show that there is noticeable difference in the standard deviations of the groups.
+
+![](hw_1.2_01.png) ![](hw_1.2_02.png) ![](hw_1.2_03.png) ![](hw_1.2_04.png) ![](hw_1.2_05.png) ![](hw_1.2_06.png) ![](hw_1.2_07.png) ![](hw_1.2_08.png) ![](hw_1.2_09.png) ![](hw_1.2_10.png)
+
+------------------------------------------------------------------------
+
+In such cases, a log transformation can be used to make the distribution of the data more suitable for an ANOVA test. As shown below, the log-transformed income values are normally distributed.
+
+It is given in the problem that we can assume they meet the assumption for standard deviation of the log-transformed data.
+
+As noted above, the samples are independent.
+
+![](hw_1.2_11.png) ![](hw_1.2_12.png) ![](hw_1.2_13.png) ![](hw_1.2_14.png) ![](hw_1.2_15.png) ![](hw_1.2_16.png) ![](hw_1.2_17.png) ![](hw_1.2_18.png) ![](hw_1.2_19.png) ![](hw_1.2_20.png)
+
+## 1.3: ANOVA Test
+
+I ran the ANOVA test in SAS, which returned an F-Statistic of 62.87 and a P-Value of \<.001 (which is sufficient to reject the null hypothesis). It also showed our R-Squared value to be .0888, and our Mean Square Error to be .0865498 (based on a 2232.120383 sum of squares and 2579 degrees of freedom).
+
+![ANOVA Results from SAS](hw_1.3_01.png)
+
+I used R to calculate the critical value:
+
+```{r}
+qf(.95, 4, 2579)
+```
+
+I also ran the ANOVA test in R, which returned the same results as SAS:
+
+```{r}
+educ_log = educ %>% mutate(log_income = log(Income2005))
+fit_basic = aov(log_income ~ Educ, data = educ_log)
+summary(fit_basic)
+```
+
+## 1.4 and 1.5: Conclusion and Scope of Inference
+
+There is overwhelming evidence (p value of \<.001) to suggest that the median incomes of the different educations level groups are not equal. This test doesn't show that the median incomes are all different between the groups, or which among them are different: further testing will be required to answer those questions.
+
+Because this is an observational study, we can't make causal statements. However, because the sample was obtained randomly, we can make inferences to the general population of interest (people who were employed in 2005).
+
+## 1.6: Difference in Means Between Groups
+
+The below table from SAS shows the means of each income group
+
+![Mean income by education level](hw_1.6_01.png)
+
+The difference between mean income of the \<12 and 12 group is:
+
+```{r}
+36864.896078 - 28301.448529
+```
+
+The difference between mean income of the 12 and 13-15 group is:
+
+```{r}
+44875.95679 - 36864.896078
+```
+
+The difference between mean income of the 13-15 and 16 group is:
+
+```{r}
+69996.972906 - 44875.95679
+```
+
+The difference between mean income of the 16 and \>16 group is:
+
+```{r}
+76855.462567 - 69996.972906
+```
+
+# Question 2: Extra Sum of Squares Test
+
+## Problem Statement / Assumptions
+
+To extend our analysis of the log-transformed data, I want to test whether there is statistical evidence that the 16-year group and \>16-year group have different means. We could conduct a t-test, but that would only use 778 degrees of freedom.
+
+An Extra Sum of Squares test can be run to combine the error models of two different ANOVA tests to compare variance between two groups out of many. The additional degrees of freedom granted by the data for the other groups gives us this test more statistical power.
+
+Our first test will assume that the "16" and "\>16" groups share a mean, while the second test will assume separate means for all the groups.
+
+Our null hypothesis is that the means of "16" and "\>16" (when grouped together, shown below as group "O") are the same (while allowing the means of the other group to be different) and our alternative hypothesis is that the groups have different means.
+
+$$H_0 \text{ (reduced model)}: \mu_{<12} \, \mu_{12} \, \mu_{13-15} \, \mu_{O} \, \mu_{O}$$
+
+$$H_a \text{ (full model)}: \mu_{<12} \, \mu_{12} \, \mu_{13-15} \, \mu_{16} \, \mu_{>16}$$
+
+## Extra Sum of Squares Test
+
+### Reduced Model
+
+First, we create a new column in the log-transformed dataframe which groups "16" and ">16" together as group "O," and run an ANOVA test.
+
+```{r}
+educ_log = educ_log %>%  
+  mutate(grouped = ifelse(Educ == "16" | Educ == ">16", "O", Educ))
+fit_reduced = aov(log_income ~ grouped, data = educ_log)
+summary(fit_reduced)
+```
+
+### Full Model
+
+Then, we run an ANOVA test that allows each group to have a separate mean (as we had previously done for Question 1).
+
+```{r}
+fit_basic = aov(log_income ~ Educ, data = educ_log)
+summary(fit_basic)
+```
+
+### Combined ANOVA Table
+
+We then construct a new ANOVA table which take the degrees of freedom and sum of squares from the reduced model as our "total," and which takes the degrees of freedom and sum of squares from the full model as our "error." We manually calculate the "Extra" line and derive our mean square for the extra and error lines, from which we can calculate our F-Statistic (2.312).
+
+|                            | df   | ss     | ms   | f     |
+| -------------------------- | ---- | ------ | ---- | ----- |
+| Between/Extra              | 1    | 2      | 2    | 2.312 |
+| Within/Separate/Full/Error | 2579 | 2232.1 | .865 |       |
+| Total/Equal/Reduced        | 2580 | 2234.1 |      |       |
+
+### Critical Value and P-Value
+
+We find our critical value for $$F_{(1, 2579)}$$ to be 3.84. I note that this is larger than the F-Statistic, meaning we fail to reject $$H_0$$. This is more precisely described by our p-value of 0.87.
+
+```{r}
+qf(.95, 1, 2579)
+pf(2.312, df1 = 1, df2 = 2579)
+```
+
+|                            | df   | ss     | ms   | f     | p-value |
+| -------------------------- | ---- | ------ | ---- | ----- | ------- |
+| Between/Extra              | 1    | 2      | 2    | 2.312 | .87     |
+| Within/Separate/Full/Error | 2579 | 2232.1 | .865 |       |         |
+| Total/Equal/Reduced        | 2580 | 2234.1 |      |       |         |
+
+### R-Squared, Mean Square Error, Degrees of Freedom
+
+Our r-squared value is .000895, and our mean square error is .865 (based on 2232.1 sum of squares and 2579 degrees of freedom).
+
+```{r}
+rsqr = 2/2234.1
+rsqr
+```
+
+## Conclusion and Scope of Inference
+
+There is insufficient evidence (p-value of .87) to suggest that there is a difference in the median incomes of people with 16 and more than 16 years of education. 
+
+Because this was an observational study, we can't make causal statements about these findings, but because the sample was taken at random we can make inferences to the population of interest (people who were employed in 2005).
+
+# 3: Welch's ANOVA Test
+
+## Problem Statement / Assumptions
+
+Our prior analysis was based on the assumption (given in the question) that the log-transformed data meets the standard deviation assumption for an ANOVA test. ANOVA is robust to violations of normality but sensitive to violations of the standard deviation assumption. If neither the original data nor the log-transformed data satisfied the standard deviation assumption, we could use Welch's ANOVA test to investigate whether there is statistical evidence that the different groups have the same mean income. This sacrifices statistical power to accommodate the additional variance and skewness in the original data. Because of this we will test the original data, not the log-transformed data. 
+
+Note that the original data wasn't normally distributed, but Welch's ANOVA test is robust against the assumption of normality when the sample size is sufficiently large (as is the case here). As previously noted, the sample data is intrinsically independent (unless some of the test subjects were doing some very shady accounting!).
+
+As with Question 1 above, our null hypothesis is that all the groups share the same mean, while our alternative hypothesis is that at least one mean differs from the others.
+
+$$ H_0 \text{ (reduced model)}: \mu_{<12} = \mu_{12} = \mu_{13-15} = \mu_{16} = \mu_{>16} $$
+
+$$ H_a \text{ (full model)}: \text{The mean of any group is different from the means of the others.} $$
+
+## Welch's ANOVA Test
+
+```{r}
+welch = oneway.test(Income2005 ~ Educ, data = educ, var.equal = FALSE)
+welch
+```
+
+### Critical Value, P-Value, and Decision
+
+The results of Welch's ANOVA in R show us the numerator and denominator degrees of freedom, which can be used to calculate our critical value.
+
+```{r}
+qf(.95, 4, 706.18)
+```
+
+I already see that our F-Statistic is much larger than the critical value, which is more precisely confirmed by our P-Value of < 2.2e-16, leading us to reject the null hypothesis.
+
+## Conclustion / Scope of Inference
+
+There is overwhelming evidence (P-Value of < 2.2e-16) that at least one of the groups of different educational achievement levels has a different mean from the other groups. 
+
+As before, we can't make causal statements (because this is an observational study and the participants weren't randomly assigned to the education groups). Because the samples were taken at random we can make inferences to the population of interest (people who were employed in 2005).

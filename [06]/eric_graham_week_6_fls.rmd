@@ -1,0 +1,157 @@
+---
+title: "Week  FLS"
+author: "Eric Graham"
+date: "2024- - "
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+    reference_doc: presentation.pptx
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = "hide")
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(scales)
+```
+
+# 1: QQQ
+
+1. a (ANOVA is very sensitive to violations of standard deviation, but we can't determine the standard deviation from a table with only averages)
+2. b (we would want to compare samples from different farms, different plots on the same farm is very open to confounding variables)
+
+# 2: Height of Basketball Players
+
+## 2.1: Side-by-Side Boxplot
+
+Visual examination of the below boxplots indicates that they appear to have similar standard deviations. 
+
+```{r}
+bball = read.csv("ANOVA Sports Height Example.csv")
+boxplot(bball$Height~bball$Sport, xlab = "Sport", ylab = "Height")
+```
+
+## 2.2 Basic ANOVA Test in R and Sas
+
+A basic ANOVA test for the dataset will show whether there is statistical evidence that any two groups have unequal means. The ANOVA test is robust against the assumption of normality with larger sample sizes, so the skewness of the Football and Soccer groups (as shown in the previous boxplots) doesn't concern me. The ANOVA test is very sensitive to violations of standard deviation, but the boxplots don't show any visual evidence of unequal variance. It is intrinsic to the data that observations are independent.
+
+$$H_0: \mu_{basketball} = \mu_{football} = \mu_{soccer} = \mu_{swimming} = \mu_{tennis}$$
+$$H_a: any two pairs of means aren't equal$$
+
+---
+
+```{r}
+fit = aov(Height ~ Sport, data = bball)
+summary(fit)
+```
+
+---
+
+As shown in both R and SAS, the P-Value is very, very small (8.25e-07) and well below the .05 threshold. Thus, there is very strong statistical evidence that the mean heights of all these groups is not equal. The question remains: is there significant evidence that the basketball players are taller than players from other sports?
+
+![Basic ANOVA Test from SAS](sas_bball_1.png)
+
+## 2.3: ANOVA Test for Difference of Non-Basketball Heights
+
+By testing a full model which looks for differences between basketball and non-basketball heights, then testing for differences in mean heights between all groups, we can derive a combined ANOVA F-Statistic to test whether there is evidence of a difference in mean heights of the non-basketball sports.
+
+$$H_0(Full \, Model): \mu_{basketball} \, \mu_{other} \, \mu_{other} \, \mu_{other} \, \mu_{other}$$
+
+$$H_a(Reduced \, Model): \mu_{basketball} \, \mu_{football} \, \mu_{soccer} \, \mu_{swimming} \, \mu_{tennis}$$
+
+---
+
+![ANOVA Test for Reduced Model in SAS](sas_bball_2.png)
+
+![ANOVA Test for Full Model in SAS](sas_bball_3.png)
+
+---
+
+I used the pf function in R to generate the P-value for the below table.
+
+```{r}
+pf(0.56, df1 = 4, df2 = 27)
+```
+
+| Source              | DF  | SS     | MS   | F   | Pr > F |
+| ------------------- | --- | ------ | ---- | --- | ------ |
+| **Model**           | 4   | 11.63  | 2.91 | .56 | .31    |
+| **Error**           | 27  | 141.56 | 5.24 |     |        |
+| **Corrected Total** | 30  | 153.19 |      |     |        |
+
+---
+
+There is not sufficient evidence to conclude that there is a difference in the mean heights of any of the non-basketball sports (P-Value .31). We have shown that there is overwhelming evidence that least two groups don't have equal mean heights, and that there is insufficient evidence to conclude that the non-basketball groups don't have the same mean height. Now we can test whether basketball players have a difference mean height from non-basketball players.
+
+# 2.4: ANOVA Test for Bsketball vs. Non-Basketball Heights
+
+By testing a full model which evaluates the means of all non-basketball heights, then testing for differences in mean heights between basketball and non-basketball groups, we can derive a combined ANOVA F-Statistic to test whether there is evidence of a difference in mean heights between basketball and non-basketball groups.
+
+NOTE: I was confused as to how the null and alternative hypotheses were set up on the FLS, they seem to be reversed when compared to the Spock example. I mirrored the Spock example, because our null hypothesis would be that basketball = other. Am I wrong?
+
+$$H_0(Full \, Model): \mu_{basketball} \, \mu_{other} \, \mu_{other} \, \mu_{other} \, \mu_{other}$$
+
+$$H_a(Reduced \, Model): \mu_{other} \, \mu_{other} \, \mu_{other} \, \mu_{other} \, \mu_{other}$$
+
+
+
+
+---
+
+We can see from the below SAS code that we have a very, very small P-Value, and thus reject the null hypothesis that the mean height of basketball players is equal to the mean height of players from other sports.
+
+![ANOVA Test from Sas](sas_bball_3.png)
+
+---
+
+In conclusion, there is overwhelming statistical evidence (P-Value <.0001) that the mean height of basketball players is different from the mean height of non-basketball players.
+
+# 3: Education and Income Data
+
+```{r}
+data = read.csv("ex0525.csv", header = TRUE)
+head(data)
+```
+
+## 3.1: Problem Statement
+
+Given a random sample of individual income and years of education, we want to investigate whether there is evidence that at least one of the education groups has a different income from the others. 
+
+$$H_0:$$ Mean income of all education groups are equal
+$$H_a:$$ At least two education groups have different mean incomes
+
+## 3.2: Assumptions
+
+We see in this boxplot that the income data is not normally distributed, but it is given that the standard deviation is equal for this exercise. 
+
+```{r}
+boxplot(data$Income2005 ~ data$Educ, xlab = "Years of Education", ylab = "Income")
+```
+
+---
+
+A log transformation would normalize the income data and make it easier to analyze.
+```{r}
+data_log = data %>% mutate(log_income = log(Income2005))
+boxplot(data_log$Income2005 ~ data_log$Educ, xlab = "Years of Education", ylab = "Income", main = "Log Adjusted Income Data")
+```
+
+## 3.3: Test on Log-Adjusted Income
+
+```{r}
+fit = aov(Income2005 ~ Educ, data = data_log)
+summary(fit)
+```
+
+## 3.4: Conclusion
+
+There is overwhelming evidence (p-value of <2e-16) that the mean income of the groups is not equal. Further testing could determine whether there is statistical evidence that any one group is different from the others (looking at the >16 group that seems like a fruitful area for exploration). 
+
+## 3.5: Scope of Inference
+
+Because the subjects weren't randomly assigned to the "treatment" group, this is an observational study, so we can't make causal statements. However, because the sample was drawn at random, we can make inferences to the population at large (in this case, people who were employed in 2005).
+
+# Takeaways and Questions
+
+1. I need to circle back to get my head around the Spock example, I feel good about basic ANOVA but am fairly lost on the multi-step ANOVA. I'm sure this will be covered in live session and I am looking forward to building a better understanding.

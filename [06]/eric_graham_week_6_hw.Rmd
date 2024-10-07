@@ -120,9 +120,9 @@ Our first test will assume that the "16" and "\>16" groups share a mean, while t
 
 Our null hypothesis is that the means of "16" and "\>16" (when grouped together, shown below as group "O") are the same (while allowing the means of the other group to be different) and our alternative hypothesis is that the groups have different means.
 
-$$H_0 \text{ (reduced model)}: \mu_{<12} \, \mu_{12} \, \mu_{13-15} \, \mu_{O} \, \mu_{O}$$
+$$H_0: \mu_{16} = \mu_{>16} \text{ represented by reduced model: } \mu_{<12} \, \mu_{12} \, \mu_{13-15} \, \mu_{O} \, \mu_{O}$$
 
-$$H_a \text{ (full model)}: \mu_{<12} \, \mu_{12} \, \mu_{13-15} \, \mu_{16} \, \mu_{>16}$$
+$$H_a" \mu_{16} \neq \mu_{>16} \text{ represented by full model: } \mu_{<12} \, \mu_{12} \, \mu_{13-15} \, \mu_{16} \, \mu_{>16}$$
 
 ## Extra Sum of Squares Test
 

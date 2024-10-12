@@ -61,7 +61,7 @@ I ran the ANOVA test in SAS, which returned an F-Statistic of 62.87 and a P-Valu
 I used R to calculate the critical value:
 
 ```{r}
-qf(.95, 4, 2579)
+qf(.95, 1, 32)
 ```
 
 I also ran the ANOVA test in R, which returned the same results as SAS:

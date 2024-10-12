@@ -1,0 +1,96 @@
+---
+title: "Week 7 FLS"
+author: "Eric Graham"
+date: "2024-10-10"
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+    reference_doc: presentation.pptx
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = "hide")
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(scales)
+```
+
+# 1: QQQ
+
+1. b
+2. d
+3. c (Dunnett's is designed to test control vs. all other groups)
+4. c
+
+# 2: Contrasts
+
+I used a contrast test in SAS to test whether the mean height of basketball players is different from the mean height of players in other sports. Our null hypothesis is that there is no difference between basketball players and players from other sports, while our alternative hypothesis is that there is a difference:
+
+$$H_0: \mu_{basketball} = \mu_{other}$$
+$$H_A: \mu_{basketball} \neq \mu_{other}$$
+
+---
+
+![SAS code used to run contrast test](2.1_01.png)
+
+---
+
+![Results of contrast test](2.1_02.png)
+
+---
+
+## Decision
+
+The very low p-value (<0.0001) leads us to reject the null hypothesis that the mean heights of basketball players are equal to the mean heights of non-basketball players. The test gives us the estimated difference (17.2778) which, when added to the given SE multiplied by the critical value, provides a confidence interval.
+
+```{r, echo = TRUE, results = "markup"}
+est = 17.2778
+se = 2.2673
+crit = qf(.95, 4, 27)
+lower = est - (se*crit)
+upper = est + (se*crit)
+lower
+upper
+```
+
+## Conclusion
+
+There is overwhelming statistical evidence (p value of <0.0001) to suggest that the mean height of basketball players is not equal to the mean heights of players of other sports. We are 95% certain that the true difference in mean heights between basketball players and players of other sports is between 11.09 and 23.46 inches. 
+
+Since this is an observational study we can't make causal statements, and by its nature this isn't something that can be tested in a randomized experiment. However, because the samples were drawn at random, we can make inferences to the population of people who play these sports.
+
+# 3: Multiple Comparisons
+
+We have statistical evidence to show that the mean height of basketball players is different from the mean height of players of other sports, but I also tested all pairwise comparisons among the sports to see if there is evidence of differences between any two means. 
+
+---
+
+![SAS code for multiple comparison with Bonferroni adjustment](2.2_01.png)
+
+---
+
+![Results from multiple comparison with Bonferroni adjustment](2.2_02.png)
+
+---
+
+## Results
+
+As we see from this table of p-values, there is overwhelming statistical evidence (p-values of .0003 or less!) that the mean height of basketball players are different from those of any other sport. Furthermore, we see no statistical evidence (p-values of 1) that there are mean differences between the mean heights of the other sports when compared to each other. This is strong evidence that, among Basketball, Football, Soccer, Swimming, and Tennis players, Basketball players are the tallest, while players of the other sports generally have the same height.
+
+![](2.2_03.png)
+
+# 4: Takeaways and Questions
+
+## Takeaways
+
+1. While basic ANOVA can find the general presence of differences of means, linear combinations can be used to specifically test the relationships of means amoung groups.
+2. Linear contrasts can be used to test for statistically significant differences between the means among any combinations of groups.
+3. There are multiple methods (such as the Bonferroni adjustment, Tukey's HSD, and Dunnett's Procedure) to conduct multiple pairwise tests for differences of means among groups while mitigating the risk of a Type I error.
+
+## Questions
+
+1. I feel good with the general concepts (especially linear contrasts and pairwise tests with Bonferroni adjustments) but I am not comfortable with the other multiple comparison methods (I do know the general use case for Dunnett's but need to learn more about how to implement).
+2. I want to learn more about the different use cases for the different pairwise methods!
+
+

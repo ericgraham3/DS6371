@@ -1,0 +1,189 @@
+---
+title: "Week 7 Homework"
+author: "Eric Graham"
+date: "2024-10-11"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(multcomp)
+library(dplyr)
+library(ggplot2)
+library(DescTools)
+```
+
+# 1: Bonferroni Method on Handicap Study
+
+## Problem Statement
+
+The handicap job interview study included scores of perceived job interview effectiveness from actors portraying different types of handicaps. There were five groups: control, amputee, crutches, hearing, and wheelchair. To test for different attitudes towards the mobility disability groups, we want to test whether there are mean differences between the amputee and crutches groups; the amputee and wheelchair groups; and the crutches and wheelchair groups. In each test, our null hypothesis assumes no difference.
+
+### Amputee - Crutches
+
+$$H_0: \mu_{amputee} = \mu_{crutches}$$
+
+$$H_A: \mu_{amputee} \neq \mu_{crutches}$$
+
+### Amputee - Wheelchair
+
+$$H_0: \mu_{amputee} = \mu_{wheelchair}$$
+$$H_A: \mu_{amputee} \neq \mu_{wheelchair}$$
+
+### Crutches - Wheelchair
+
+$$H_0: \mu_{crutches} = \mu_{wheelchair}$$
+
+$$H_A: \mu_{crutches} \neq \mu_{wheelchair}$$
+
+## Critical Value
+
+Because running multiple pairwise tests with a higher $$\alpha$$ value can lead to an unacceptable number of Type I errors, we use a Bonferroni adjustment. The Bonferroni-Adjusted $$\alpha$$ value is found by dividing the $$\alpha$$ value by the number of comparisons being made. This shrinks the $$\alpha$$ value, decreasing the likelihood of a Type I error (at the expense of some power). 
+
+```{r}
+handicap = read.csv("Unit 7 Handicap Data.csv", header = TRUE)
+n = nrow(handicap)
+k = 5
+df = n-k
+bonferroni_adjustment = .05/3
+crit_value = qt(1-bonferroni_adjustment, df, lower.tail = TRUE)
+crit_value
+cv_2 = qt(1 - bonferroni_adjustment / 2, df)
+cv_2
+```
+
+## Critical Value, P-Value, and Decision
+
+I used SAS to conduct the multiple comparison tests with a Bonferroni adjustment. It provided test statistics, p-values, and confidence intervals for all pairwise comparisons.
+
+![SAS code used for test](hw_1.01.png)
+
+![Results for amputee-crutches comparison](hw_1.02.png)
+For the comparison of means between the Amputee and Crutches group, we have a very low p-value (0.0035) and thus reject the null hypothesis.
+
+![Results for amputee-wheelchair comparison](hw_1.03.png)
+
+For the comparison of means between the Amputee and Wheelchair group, we have a high p-value (0.3520) and thus fail to reject the null hypothesis.
+
+![Results for crutches-wheelchair comparison](hw_1.04.png)
+
+For the comparison of means between the Crutches and Wheelchair groups, we have a low p-value (0.0401) and thus reject the null hypothesis, though this is much closer to the significance level and thus the evidence of a difference isn't as strong as with the comparison of the Amputee and Crutches groups.
+
+![Confidence intervals for pairwise comparisons](hw_1.05.png)
+
+## Statistical Conclusions
+
+When comparing the mean scores of the Amputee and Crutches groups, we see very strong statistical evidence (p-value of 0.0035) that there is a difference of means between the two groups. We are 95% certain that the true mean difference in means between the two groups is between -3.2864	and 0.3007.
+
+When comparing the mean scores of the amputee and wheelchair groups, we see very strong statistical evidence (p-value of 0.3520) the there is no difference between the means of the two groups. We are 95% certain that the true mean difference in means between the two groups is between -2.7079	and 0.8793.
+
+When comparing the mean scores of the crutches and wheelchair groups, there is sufficient evidence to suggest (p-value of 0.0401) that there is a difference of means between the two groups. We are 95% certain that the true mean difference in means between the two groups is between -1.2150 and	2.3721.
+
+Because the test subjects (the students who observed the interviews) were randomly selected and randomly assigned to view one of the mock interviews, we might be able to make causal inferences and we can make inferences to the population (students). However, there is a potential for bias in this study: because actors were used to portray the handicapped interviewees, and they weren't assigned randomly, it is possible that the efficacy of a given actor's performance could introduce a confounding variable. A better experiment might involve actual disabled people interviewing for jobs with people who actually conduct job interviews.
+
+# 2: Multiple Comparison Procedures and Half-Width Confidence Intervals
+
+For the handicap study dataset, we were asked to see what multiple comparison procedures are available within the one-way ANOVA procedure, and to verify the half-width confidence intervals found in our textbook (see below).
+
+![Figure 6.6 from the textbook](hw_2.00.png)
+
+## In SAS
+
+SAS makes it easy to use multiple comparison methods for an ANOVA test. The below code ran the LSD, Dunnett, Tukey-Kramer, Bonferroni, and Scheffe tests and provided their half-width confidence intervals.
+
+![SAS code for multiple comparisons](hw_2.01.png)
+We can see from the below results that the half-width confidence intervals match what was shown in our textbook.
+
+### LSD
+
+The below results show the "Least Significant Difference" as being 1.2326.
+
+![LSD Multiple Comparison](hw_2.02.png)
+
+### Dunnett's
+
+The below results show the "Minimum Significant Difference" as being 1.5449.
+
+![Dunnett Multiple Comparison](hw_2.03.png)
+
+### Tukey-Kramer
+
+The below results show the "Minimum Significant Difference" as being 1.7317.
+
+![Tukey Multiple Comparison](hw_2.04.png)
+
+### Bonferroni
+
+The below results show the "Minimum Significant Difference" as being 1.7936.
+
+![Bonferroni Multiple Comparison](hw_2.05.png)
+
+## Scheffe
+
+The below results show the "Minimum Significant Difference" as being 1.9568.
+
+![Scheffe Multiple Comparison](hw_2.06.png)
+
+## In R
+
+The first step is to fit the data to an ANOVA model using the aov() function. This model can then be passed to other procedures to apply the respective test.
+
+```{r}
+fit = aov(Score ~ Handicap, data = handicap)
+```
+
+### LSD
+
+```{r}
+who knows???
+```
+
+
+### Dunnett
+
+There is a Dunnett test available in the glht function.
+
+```{r}
+dunnett_gfit = glht(fit, linfct = mcp(Handicap = "Dunnett"))
+summary(dunnett_gfit)
+confint(dunnett_gfit)
+```
+
+### Tukey-Kramer
+
+Likewise, glht() supports Tukey-Kramer
+
+```{r}
+tukey_gfit = glht(fit, linfct = mcp(Handicap = "Tukey"))
+summary(tukey_gfit)
+confint(tukey_gfit)
+```
+
+### Bonferroni
+
+Bonferroni is also supported by glht, but requires an additional step to summarize the data with a Bonferroni adjustment.
+
+```{r}
+
+bon =  glht(fit)
+summary(bon, test = adjusted("bonferroni"))
+confint(bon)
+
+#bon = pairwise.t.test(handicap$Score, handicap$Handicap, p.adjust.method="bonferroni")
+#summary(bon)
+
+```
+
+### Scheffe
+
+For Scheffe, I had to do some digging, the DescTools package has a ScheffeTest() function.
+
+```{r}
+scheffe_gfit = ScheffeTest(fit)
+scheffe_gfit
+```
+
+# 3: Tukey-Kramer and Dunnett Procedures for Log-Transformed Income Data
+
+1. Copy-paste from last week, 1.1-1.4 (unless doing Welch's, in which case 1.1, 1.2 and all of 3
+2. Tack on Tukey-Kramer and Dunnett

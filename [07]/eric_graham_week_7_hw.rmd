@@ -10,7 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(multcomp)
 library(dplyr)
 library(ggplot2)
-library(DescTools)
+library(agricolae) # for the LSD adjustment
+library(DescTools) # for the Scheffe test
 ```
 
 # 1: Bonferroni Method on Handicap Study
@@ -54,30 +55,39 @@ cv_2
 
 ## Critical Value, P-Value, and Decision
 
-I used SAS to conduct the multiple comparison tests with a Bonferroni adjustment. It provided test statistics, p-values, and confidence intervals for all pairwise comparisons.
+I used SAS to conduct the multiple comparison tests with a Bonferroni adjustment and contrasts for the specific questions of interest. It provided test statistics, p-values, and confidence intervals for all pairwise comparisons.
 
 ![SAS code used for test](hw_1.01.png)
 
-![Results for amputee-crutches comparison](hw_1.02.png)
-For the comparison of means between the Amputee and Crutches group, we have a very low p-value (0.0035) and thus reject the null hypothesis.
+![Results from contrast tests (unadjusted)](hw_1.02.png)
 
-![Results for amputee-wheelchair comparison](hw_1.03.png)
+For the comparison of means between the Amputee and Crutches group, we have a p-value of (.0184). When we apply the Bonferroni adjustment and multiply the p-value by 3 (because we are making three comparisons) that p-value becomes .0552, and thus we fail to reject the null hypothesis.
 
-For the comparison of means between the Amputee and Wheelchair group, we have a high p-value (0.3520) and thus fail to reject the null hypothesis.
+```{r}
+.0184*3
+```
 
-![Results for crutches-wheelchair comparison](hw_1.04.png)
+For the comparison of means between the Amputee and Wheelchair group, we have a high p-value (0.1433). When we apply the Bonferroni adjustment and multiply the p-value by 3 (because we are making three comparisons) that p-value becomes .4299, and thus we fail to reject the null hypothesis.
 
-For the comparison of means between the Crutches and Wheelchair groups, we have a low p-value (0.0401) and thus reject the null hypothesis, though this is much closer to the significance level and thus the evidence of a difference isn't as strong as with the comparison of the Amputee and Crutches groups.
+```{r}
+.1433*3
+```
 
-![Confidence intervals for pairwise comparisons](hw_1.05.png)
+For the comparison of means between the Amputee and Wheelchair group, we have a high p-value (0.3520). When we apply the Bonferroni adjustment and multiply the p-value by 3 (because we are making three comparisons) that p-value becomes 1.056, which we interpret as a p-value of 1 because one can't mathematically be 105.6% certain of something, and thus we fail to reject the null hypothesis.
+
+```{r}
+.3520*3
+```
+
+![Confidence intervals for pairwise comparisons](hw_1.03.png)
 
 ## Statistical Conclusions
 
-When comparing the mean scores of the Amputee and Crutches groups, we see very strong statistical evidence (p-value of 0.0035) that there is a difference of means between the two groups. We are 95% certain that the true mean difference in means between the two groups is between -3.2864	and 0.3007.
+When comparing the mean scores of the Amputee and Crutches groups, there is sufficient statistical evidence (Bonferroni-adjusted p-value of .0552) that there is no difference of means between the two groups. We are 95% certain that the true mean difference in means between the two groups is between -3.2864	and 0.3007.
 
-When comparing the mean scores of the amputee and wheelchair groups, we see very strong statistical evidence (p-value of 0.3520) the there is no difference between the means of the two groups. We are 95% certain that the true mean difference in means between the two groups is between -2.7079	and 0.8793.
+When comparing the mean scores of the amputee and wheelchair groups, there is strong statistical evidence (Bonferroni-adjusted p-value of 0.4299) that there is no difference between the means of the two groups. We are 95% certain that the true mean difference in means between the two groups is between -2.7079	and 0.8793.
 
-When comparing the mean scores of the crutches and wheelchair groups, there is sufficient evidence to suggest (p-value of 0.0401) that there is a difference of means between the two groups. We are 95% certain that the true mean difference in means between the two groups is between -1.2150 and	2.3721.
+When comparing the mean scores of the crutches and wheelchair groups, there is overwhelming evidence to suggest (Bonferroni-adjusted p-value of 1) that there is no difference of means between the two groups. We are 95% certain that the true mean difference in means between the two groups is between -1.2150 and	2.3721.
 
 Because the test subjects (the students who observed the interviews) were randomly selected and randomly assigned to view one of the mock interviews, we might be able to make causal inferences and we can make inferences to the population (students). However, there is a potential for bias in this study: because actors were used to portray the handicapped interviewees, and they weren't assigned randomly, it is possible that the efficacy of a given actor's performance could introduce a confounding variable. A better experiment might involve actual disabled people interviewing for jobs with people who actually conduct job interviews.
 
@@ -94,31 +104,31 @@ SAS makes it easy to use multiple comparison methods for an ANOVA test. The belo
 ![SAS code for multiple comparisons](hw_2.01.png)
 We can see from the below results that the half-width confidence intervals match what was shown in our textbook.
 
-### LSD
+### LSD Adjustment
 
 The below results show the "Least Significant Difference" as being 1.2326.
 
 ![LSD Multiple Comparison](hw_2.02.png)
 
-### Dunnett's
+### Dunnett Test
 
 The below results show the "Minimum Significant Difference" as being 1.5449.
 
 ![Dunnett Multiple Comparison](hw_2.03.png)
 
-### Tukey-Kramer
+### Tukey-Kramer Test
 
 The below results show the "Minimum Significant Difference" as being 1.7317.
 
 ![Tukey Multiple Comparison](hw_2.04.png)
 
-### Bonferroni
+### Bonferroni Adjustment
 
 The below results show the "Minimum Significant Difference" as being 1.7936.
 
 ![Bonferroni Multiple Comparison](hw_2.05.png)
 
-## Scheffe
+## Scheffe Test
 
 The below results show the "Minimum Significant Difference" as being 1.9568.
 
@@ -126,20 +136,22 @@ The below results show the "Minimum Significant Difference" as being 1.9568.
 
 ## In R
 
-The first step is to fit the data to an ANOVA model using the aov() function. This model can then be passed to other procedures to apply the respective test.
+The first step is to fit the data to an ANOVA model using the aov() function. This model can then be passed to other procedures to apply the respective test/adjustment.
 
 ```{r}
 fit = aov(Score ~ Handicap, data = handicap)
 ```
 
-### LSD
+### LSD Adjustment
+
+The agricolae package includes a function for applying the LSD adjustment to an ANOVA model.
 
 ```{r}
-who knows???
+lsd = LSD.test(fit, "Handicap", p.adj = "none")
+print(lsd)
 ```
 
-
-### Dunnett
+### Dunnett Test
 
 There is a Dunnett test available in the glht function.
 
@@ -149,9 +161,9 @@ summary(dunnett_gfit)
 confint(dunnett_gfit)
 ```
 
-### Tukey-Kramer
+### Tukey-Kramer Test
 
-Likewise, glht() supports Tukey-Kramer
+Likewise, glht() supports Tukey-Kramer tests.
 
 ```{r}
 tukey_gfit = glht(fit, linfct = mcp(Handicap = "Tukey"))
@@ -159,31 +171,204 @@ summary(tukey_gfit)
 confint(tukey_gfit)
 ```
 
-### Bonferroni
+### Bonferroni Adjustment
 
-Bonferroni is also supported by glht, but requires an additional step to summarize the data with a Bonferroni adjustment.
+Bonferroni adjustments are also supported by R, by applying the adjustment to the summary() and confint() functions.
 
 ```{r}
 
 bon =  glht(fit)
 summary(bon, test = adjusted("bonferroni"))
-confint(bon)
-
-#bon = pairwise.t.test(handicap$Score, handicap$Handicap, p.adjust.method="bonferroni")
-#summary(bon)
-
+confint(bon, adjust.method = "bonferroni")
 ```
 
-### Scheffe
+### Scheffe Test
 
-For Scheffe, I had to do some digging, the DescTools package has a ScheffeTest() function.
+The DescTools package has a ScheffeTest() function.
 
 ```{r}
-scheffe_gfit = ScheffeTest(fit)
-scheffe_gfit
+scheffe = ScheffeTest(fit)
+scheffe
 ```
 
 # 3: Tukey-Kramer and Dunnett Procedures for Log-Transformed Income Data
 
 1. Copy-paste from last week, 1.1-1.4 (unless doing Welch's, in which case 1.1, 1.2 and all of 3
 2. Tack on Tukey-Kramer and Dunnett
+
+## Problem Statement
+
+Given a sample of incomes and number of years of education completed, we want to determine whether there is any evidence that there is a difference in mean income between the various levels of educational achievement. The data is broken down into six groups based on the number of years completed:
+
+```{r}
+educ = read.csv("../[06]/ex0525.csv", header = TRUE)
+educ_levels = educ %>%
+  distinct(Educ)
+educ_levels
+```
+
+Analysis of Variance (ANOVA) can be used here to see if there is statistical evidence that at least one of the groups has a different mean income than the others. This basic ANOVA will compare the sum of squared differences under a reduced model which assumes that the groups all share the same mean, and compare that to a full model which assumes that each group mean is independent, and provide a p-value to measure the probability that all groups share the same mean.
+
+$$ H_0 \text{ (reduced model)}: \mu_{<12} = \mu_{12} = \mu_{13-15} = \mu_{16} = \mu_{>16} $$
+
+$$ H_a \text{ (full model)}: \text{The mean of any group is different from the means of the others.} $$
+
+## ANOVA Assumptions
+
+The ANOVA test' relies on the groups to be normally distributed; to have the same standard deviation; and to be independent.
+
+By its nature, this data is independent.
+
+The below histograms and qqplots show that the distributions are generally right-skewed, but ANOVA is robust against violations of normality if the sample sizes are large (as is the case here).
+
+However, the ANOVA test is sensitive to violations of the standard deviation assumption, and the below histograms and qqplots show that there is noticeable difference in the standard deviations of the groups.
+
+![](../[06]/hw_1.2_01.png)
+![](../[06]/hw_1.2_02.png)
+![](../[06]/hw_1.2_03.png)
+![](../[06]/hw_1.2_04.png)
+![](../[06]/hw_1.2_05.png)
+![](../[06]/hw_1.2_06.png)
+![](../[06]/hw_1.2_07.png)
+![](../[06]/hw_1.2_08.png)
+![](../[06]/hw_1.2_09.png)
+![](../[06]/hw_1.2_10.png)
+
+---
+
+In such cases, a log transformation can be used to make the distribution of the data more suitable for an ANOVA test. As shown below, the log-transformed income values are normally distributed.
+
+It is given in the problem that we can assume they meet the assumption for standard deviation of the log-transformed data.
+
+As noted above, the samples are independent.
+
+![](../[06]/hw_1.2_11.png)
+![](../[06]/hw_1.2_12.png)
+![](../[06]/hw_1.2_13.png)
+![](../[06]/hw_1.2_14.png)
+![](../[06]/hw_1.2_15.png)
+![](../[06]/hw_1.2_16.png)
+![](../[06]/hw_1.2_17.png)
+![](../[06]/hw_1.2_18.png)
+![](../[06]/hw_1.2_19.png)
+![](../[06]/hw_1.2_20.png)
+
+## ANOVA Test
+
+I ran the ANOVA test in SAS, which returned an F-Statistic of 62.87 and a P-Value of \<.001 (which is sufficient to reject the null hypothesis). It also showed our R-Squared value to be .0888, and our Mean Square Error to be .0865498 (based on a 2232.120383 sum of squares and 2579 degrees of freedom).
+
+![ANOVA Results from SAS](../[06]/hw_1.3_01.png)
+
+I used R to calculate the critical value:
+
+```{r}
+qf(.95, 1, 32)
+```
+
+I also ran the ANOVA test in R, which returned the same results as SAS:
+
+```{r}
+educ_log = educ %>% mutate(log_income = log(Income2005), Educ = as.factor(Educ))
+fit_educ_log = aov(log_income ~ Educ, data = educ_log)
+summary(fit_educ_log)
+```
+
+## Conclusion and Scope of Inference for ANOVA
+
+There is overwhelming evidence (p value of \<.001) to suggest that the median incomes of the different educations level groups are not equal. This test doesn't show that the median incomes are all different between the groups, or which among them are different: further testing will be required to answer those questions.
+
+Because this is an observational study, we can't make causal statements. However, because the sample was obtained randomly, we can make inferences to the general population of interest (people who were employed in 2005).
+
+## Tukey-Kramer Test for Pairwise Comparisons
+
+I used the Tukey-Kramer test to make multiple pairwise comparisons among all the education levels. The Tukey-Kramer test uses the studentized range distribution (as opposed to the normal distribution) to make multiple comparisons. Testing with this distribution reduces the likelihood of Type I error, but maintains more statistical power than the more-conservative Bonferroni-adjusted t-test on multiple pairs.
+
+As we see from the p-values in the results below, the Tukey-Kramer test finds overwhelming statistical evidence for differences in means between all pairwise groups except the "16" and ">16" group. 
+
+```{r}
+tukey_educ_log = glht(fit_educ_log, linfct = mcp(Educ = "Tukey"))
+summary(tukey_educ_log)
+```
+
+The test also provides confidence intervals based on the log-transformed data.
+
+```{r}
+confint(tukey_educ_log)
+```
+
+By reversing the log transformation on these values with the exp() function, we can determine a confidence interval for the percentage difference in incomes between the two groups. 
+
+As an example, I want to look closely at the difference between the 12 and <12 groups. We are testing the null hypothesis that the median income (median, since we are working with log-transformed data) is the same between these two groups.
+
+$$H_0: \mu_{12} = \mu_{<12}$$
+$$H_a: \mu_{12} \neq \mu_{<12}$$
+
+```{r}
+k = nrow(educ_levels)
+n = nrow(educ_log)
+df = fit_educ_log$df.residual
+qtukey(.95, k, df)
+```
+
+The critical value is 3.860, and our Tukey test-statistic (from the code above) is 3.861, which provides a p-value of .001 (also from the code above), which leads us to reject the null hypothesis.
+
+```{r}
+lower = exp(0.09821)
+upper = exp(0.55754)
+lower
+upper
+```
+
+By reversing the log transformation on the confidence interval, we can report a confidence interval of 110.319% to 174.637% difference between the mean income of those who complete 12 years of education and those who complete less than 12 years of education.
+
+Our conclusion is that there is strong evidence to suggest that the median incomes of those who complete 12 years of education are not the same as the median incomes of those who complete less than 12 years of education. We are 95% confident that the mean income for people who completes 12 years of education is between 110.319% to 174.637% greater than that of people who complete less than 12 years of education.
+
+This method can be used to duplicate the analysis for all other pairwise comparisons among the groups.
+
+## Dunnett Procedure for Education Level 12 vs. All Other Education Levels
+
+I used the Dunnett test to compare the Education Level 12 group to all other groups. The Dunnett test uses the Dunnett's distribution (as opposed to the normal distribution) to compare a control group to all other treatment groups. Like Tukey's test, this test reduces the likelihood of Type I error, but maintains more statistical power than the more-conservative Bonferroni-adjusted t-test on multiple pairs.
+
+To set the "12" group as our control group, I had to specify the factor levels accordingly, and re-fit the model. As we see from the p-values in the results below, the Dunnett test finds overwhelming statistical evidence for differences in means between the 12 group and all other groups. 
+
+```{r}
+educ_log$Educ = factor(educ_log$Educ, levels = c("12", "<12", "13-15", ">16", "16"))
+fit_educ_log = aov(log_income ~ Educ, data = educ_log)
+dunnett_educ_log = glht(fit_educ_log, linfct = mcp(Educ = "Dunnett"))
+summary(dunnett_educ_log)
+```
+
+The test also provides confidence intervals based on the log-transformed data.
+
+```{r}
+confint(dunnett_educ_log)
+```
+
+By reversing the log transformation on these values with the exp() function, we can determine a confidence interval for the percentage difference in incomes between the two groups. 
+
+As an example, I want to look closely at the difference between the 12 and 16 groups. We are testing the null hypothesis that the median income (median, since we are working with log-transformed data) is the same between these two groups.
+
+$$H_0: \mu_{12} = \mu_{16}$$
+$$H_a: \mu_{12} \neq \mu_{16}$$
+
+```{r}
+k = nrow(educ_levels)
+n = nrow(educ_log)
+df = fit_educ_log$df.residual
+qtukey(.95, k, df)
+```
+
+The critical value is 3.860, and our Dunnett test-statistic (from the code above) is 10.439, which provides a p-value of < 1e-04 (also from the code above), which leads us to reject the null hypothesis.
+
+```{r}
+lower = exp(0.43445)
+lower
+upper = exp(0.70529)
+upper
+```
+
+By reversing the log transformation on the confidence interval, we can report a 95% confidence interval of 43.445% to 70.529% difference between the mean income of those who complete 16 years of education and those who complete 12 years of education.
+
+Our conclusion is that there is strong evidence to suggest that the median incomes of those who complete 16 years of education are not the same as the median incomes of those who complete 12. We are 95% confident that the mean income for people who completes 16 years of education is between 43.445% to 70.529% greater than that of people who complete 12 years of education.
+
+This method can be used to duplicate the analysis for all other pairwise comparisons among the groups.

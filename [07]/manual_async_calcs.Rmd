@@ -1,0 +1,63 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+control = 4.9
+amputee = 4.4286
+crutches = 5.9214
+hearing = 4.05
+wheelchair = 5.3429
+
+g = control - (.5*crutches) - (.5*wheelchair)
+g
+seg = 1.6329*sqrt((1/14)+(.25/14)+(.25/14))
+seg
+crit = qf(.95, 4, 65)
+crit
+p = g/seg
+p
+lower = g - (seg*crit)
+upper = g + (seg*crit)
+lower
+upper
+```
+
+For the average and obese groups, calculate the Dunnett's test statistic and the Tukey HSD statistic to test whether the difference in mean estimated time is statistically significant. Be sure to draw a conclusion both statistically and contextually.
+
+H0: mean average = mean obese
+abs()
+HA: mean average new mean obese
+
+```{r}
+average_mean = 31.1
+average_n = 31
+ow_mean = 25
+ow_n = 36
+ob_mean = 22.4
+ob_n = 43
+mse = 83.87
+
+observed_diff = abs(average_mean - ob_mean)
+observed_diff
+
+harmonic = 2/((1/average_n)+(1/ob_n))
+
+tukey_srs = 3.36
+
+dunnett_stat = 2.27
+
+tukeys_hsd =  tukey_srs*sqrt(mse/harmonic)
+tukeys_hsd
+observed_diff > tukeys_hsd
+
+dunnett = dunnett_stat*sqrt((2*mse)/harmonic)
+dunnett
+observed_diff > dunnett
+```
+Since the observed difference is greater than the expected value (from Tukey's HSD) we reject H0. There is evidence of a statistically significant difference between the amount of time that doctors would spend with obese patients than they would spend with average weight patients. 
+
+Since the observed difference in greated than the expected value (from Dunnett's procedure) we reject H0. There is evidence of a statistically significant difference between the amount of time that doctors would spend with obese patients than they would spend with average weight patients. 
+

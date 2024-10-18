@@ -39,7 +39,7 @@ $$H_A: \mu_{crutches} \neq \mu_{wheelchair}$$
 
 ## Critical Value
 
-Because running multiple pairwise tests with a higher $$\alpha$$ value can lead to an unacceptable number of Type I errors, we use a Bonferroni adjustment. The Bonferroni-Adjusted $$\alpha$$ value is found by dividing the $$\alpha$$ value by the number of comparisons being made. This shrinks the $$\alpha$$ value, decreasing the likelihood of a Type I error (at the expense of some power). 
+Because running multiple pairwise tests with a higher alpha value can lead to an unacceptable number of Type I errors, we use a Bonferroni adjustment. The Bonferroni-Adjusted alpha value is found by dividing the alpha value by the number of comparisons being made. This shrinks aare to the right or left of the alpha value, decreasing the likelihood of a Type I error (at the expense of some power). 
 
 ```{r}
 handicap = read.csv("Unit 7 Handicap Data.csv", header = TRUE)
@@ -91,6 +91,8 @@ When comparing the mean scores of the crutches and wheelchair groups, there is o
 
 Because the test subjects (the students who observed the interviews) were randomly selected and randomly assigned to view one of the mock interviews, we might be able to make causal inferences and we can make inferences to the population (students). However, there is a potential for bias in this study: because actors were used to portray the handicapped interviewees, and they weren't assigned randomly, it is possible that the efficacy of a given actor's performance could introduce a confounding variable. A better experiment might involve actual disabled people interviewing for jobs with people who actually conduct job interviews.
 
+---
+
 # 2: Multiple Comparison Procedures and Half-Width Confidence Intervals
 
 For the handicap study dataset, we were asked to see what multiple comparison procedures are available within the one-way ANOVA procedure, and to verify the half-width confidence intervals found in our textbook (see below).
@@ -102,6 +104,7 @@ For the handicap study dataset, we were asked to see what multiple comparison pr
 SAS makes it easy to use multiple comparison methods for an ANOVA test. The below code ran the LSD, Dunnett, Tukey-Kramer, Bonferroni, and Scheffe tests and provided their half-width confidence intervals.
 
 ![SAS code for multiple comparisons](hw_2.01.png)
+
 We can see from the below results that the half-width confidence intervals match what was shown in our textbook.
 
 ### LSD Adjustment
@@ -156,6 +159,8 @@ print(lsd)
 There is a Dunnett test available in the glht function.
 
 ```{r}
+handicap$Handicap = as.factor(handicap$Handicap)
+fit = aov(Score ~ Handicap, data = handicap)
 dunnett_gfit = glht(fit, linfct = mcp(Handicap = "Dunnett"))
 summary(dunnett_gfit)
 confint(dunnett_gfit)
@@ -191,10 +196,11 @@ scheffe = ScheffeTest(fit)
 scheffe
 ```
 
+---
+
 # 3: Tukey-Kramer and Dunnett Procedures for Log-Transformed Income Data
 
-1. Copy-paste from last week, 1.1-1.4 (unless doing Welch's, in which case 1.1, 1.2 and all of 3
-2. Tack on Tukey-Kramer and Dunnett
+NOTE: the first few sections for this question duplicate my work from the Week 6 homework, in which I conducted a complete analysis of the log-transformed education/income data using a basic ANOVA test to determine whether there is a difference in median income between any pairs. The multiple comparison parts of this question are addressed in the "Tukey-Kramer Test for Pairwise Comparisons" and "Dunnett Procedure for Education Level 12 vs. All Other Education Levels" sections, below.
 
 ## Problem Statement
 
@@ -234,7 +240,7 @@ However, the ANOVA test is sensitive to violations of the standard deviation ass
 ![](../[06]/hw_1.2_09.png)
 ![](../[06]/hw_1.2_10.png)
 
----
+\newpage
 
 In such cases, a log transformation can be used to make the distribution of the data more suitable for an ANOVA test. As shown below, the log-transformed income values are normally distributed.
 

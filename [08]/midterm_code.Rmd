@@ -1,0 +1,337 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stats)
+library(tidyverse)
+library(lsmeans)
+```
+
+
+# Chapter 1
+
+## Critical Values
+
+```{r}
+alpha = 0.05
+df = 20 
+crit_value = qt(1 - alpha / 2, df)
+crit_value
+```
+
+```{r}
+alpha = 0.05
+df1 = 5
+df2 = 10
+critical_value = qf(1 - alpha, df1, df2)
+critical_value
+```
+
+
+## Permutation Test
+
+```{r}
+# Read in Data
+cash <- read.table(file.choose(),header = T,sep = ","); # This reads in the data.
+
+xbars = cash %>% group_by(School) %>% summarize(mean = mean(Cash))
+xbarNminusT = xbars[1,2] - xbars[2,2] # observed difference xbarSMU - xbarSeattle = 52.125
+xbarNminusT
+
+set.seed(2) # So we all get the same randomizations and thus the same values ... comment this out to see how the result changes based on the randomization.
+
+# create variable to hold the difference in means for all of our sample distributions
+xbarDiffHolder = numeric(10000)
+
+# for loop runs 10000 times to "shuffle" the labels in our dataset, calculate the mean of the permuted dataset (grouped by school),
+# calculate the difference between the two schools, and then store that difference in the xbarDiffHolder variable
+for (i in 1:10000)
+{
+  scrambledLabels = sample(cash$School,30); #shuffle the Labels
+  
+  cashTemp = cash
+  cashTemp$School = scrambledLabels
+  
+  xbars = cashTemp %>% group_by(School) %>% summarize(mean = mean(Cash))
+  xbarNminusT = xbars[1,2] - xbars[2,2] # observed difference xbarIntrinsic - xbarExtrinsic = 21.16667
+  xbarNminusT
+  xbarDiffHolder[i] = xbarNminusT$mean
+  
+}
+
+# create data from from xbarDiffHolder and generate a histogram showing the distribution of the difference of sample means
+df = data.frame(xbarDiffs = xbarDiffHolder)
+
+g = df %>% ggplot(mapping = aes(x = xbarDiffs)) + 
+  geom_histogram(bins = 25, fill = "cornflowerblue", linewidth = 0.1) +
+  ggtitle("Histogram of the Permutation Distribution of the Difference of Sample Means Scores")
+g
+
+# count how many differences of sample means from our 10000 permutations are greater than the observed difference from our original sample and store in the variable num_more_extreme
+num_more_extreme = sum((abs(xbarDiffHolder)) >= 52.125)
+num_more_extreme
+
+# divide num_more_extreme by 10000, the number of permutations we created, to derive the p-value (which is the percentage of differences of sample means that were as extreme, or more extreme, than the observed difference)
+pvalue = num_more_extreme / 10000
+pvalue
+```
+
+# Chapter 2
+
+## T-test
+
+Compare two variables in a dataframe
+
+```{r}
+t_test_result = t.test(score ~ group, data = df)
+
+print(t_test_result)
+```
+
+filter groups from a dataframe
+
+```{r}
+group1 = df$score[df$group == 1]
+group2 = df$score[df$group == 2]
+
+t_test_result = t.test(group1, group2)
+
+print(t_test_result)
+```
+
+compare two lists
+
+```{r}
+Fired = c(34, 37, 37, 38, 41, 42, 43, 44, 44, 45, 45, 45, 46, 48, 49, 53, 53, 54, 54, 55, 56)
+Not_fired = c(27, 33, 36, 37, 38, 38, 39, 42, 42, 43, 43, 44, 44, 44, 45, 45, 45, 45, 46, 46, 47, 47, 48, 48, 49, 49, 51, 51, 52, 54)
+t.test(x = Fired, y = Not_fired, conf.int = .95, var.equal = TRUE, alternative = "two.sided")
+```
+
+# Chapter 3
+
+## Paired t-test
+
+```{r}
+twitch = read.csv()
+t.test(x = twitch$Ritalin, y = twitch$Placebo, paired = TRUE)
+```
+
+## Log Transformation
+
+Show distribution before
+
+```{r}
+education %>% ggplot(aes(x = Income2005)) +
+  geom_histogram(color = "blue") +
+  facet_wrap(~Educ) +
+  theme_economist() +
+  scale_x_continuous(labels = scales::comma) +
+  labs(
+    title = "Income Distribution by Education Level",
+    x = "Income",
+    y = "Education Level"
+  )
+```
+
+Transform
+
+```{r}
+education_log = education %>% mutate(log_income = log(Income2005))
+head(education_log)
+education_log %>% group_by(Educ) %>% summarize(mean_income = mean(log_income), sd_income = sd(log_income), count = n())
+```
+
+Look at transformed data
+
+```{r}
+education_log %>% ggplot(aes(x = log_income)) +
+  geom_histogram(color = "blue") +
+  facet_wrap(~Educ) +
+  theme_economist() +
+  scale_x_continuous(labels = scales::comma) +
+  labs(
+    title = "Log-Adjusted Income Distribution by Education Level",
+    x = "Income",
+    y = "Education Level"
+  )
+```
+
+Test it
+
+```{r}
+log_test_result = t.test(log_income ~ Educ, data = education_log, var.equal = TRUE)
+log_test_result
+```
+
+Don't forget to reverse the transformation
+
+```{r}
+lower_bound = log_test_result$conf.int[1]
+upper_bound = log_test_result$conf.int[2]
+reported_lower_bound = exp(lower_bound)
+reported_upper_bound = exp(upper_bound)
+reported_lower_bound
+reported_upper_bound
+```
+
+## Welch's T-Test
+
+```{r}
+t.test(Income2005 ~ Educ, data = education, var.equal = FALSE)
+```
+
+# Unit 4
+
+## Power (and SD Pooled)
+
+```{r}
+fired = c(34, 37, 37, 38, 41, 42, 43, 44, 44, 45, 45, 45, 46, 48, 49, 53, 53, 54, 54, 55, 56)
+not_fired = c(27, 33, 36, 37, 38, 38, 39, 42, 42, 43, 43, 44, 44, 44, 45, 45, 45, 45, 46, 46, 47, 47, 48, 48, 49, 49, 51, 51, 52, 54)
+
+n_fired = length(fired)
+n_not_fired = length(not_fired)
+
+pooled_sd = sd_pooled(fired, not_fired)
+pooled_sd
+power.t.test(n = n_fired, delta = 2, sd = pooled_sd, sig.level = .05, type = "two.sample", alternative = "one.sided")
+
+# sample required to achieve 90% power
+
+power.t.test(power = .9, delta = 2, sd = pooled_sd, sig.level = .05, type = "two.sample", alternative = "one.sided")
+```
+
+## Calculating Beta and a Beta Curve
+
+```{r}
+#Alpha
+betaholder = c()
+alphas = seq(.1,1,length = 50)
+
+for(i in 1:50)
+{
+    betaholder[i] = 1 - power.t.test(n = 500, delta = .2, sd = 1.445, sig.level = alphas[i], type = "two.sample",alternative = "two.sided")$power
+}
+
+plot(alphas,betaholder,type = "l", col = "blue", main = "Beta CURVE", ylab = "Beta", lwd = 3)
+
+```
+
+## Calculate power and beta simply
+
+```{r}
+# Inputs for the t-test
+n = 30                 # Sample size per group
+mean_diff = 50 - 45    # Difference in means
+sd = 5                 # Standard deviation
+alpha = 0.05           # Significance level
+
+# Calculate the power
+power_result = power.t.test(n = n, delta = mean_diff, sd = sd, sig.level = alpha, type = "two.sample")
+
+# Extract the power value
+power_value = power_result$power
+
+# Calculate the beta (Type II error rate)
+beta_value = 1 - power_value
+
+# Display the power and beta values
+power_value  # Power of the test
+beta_value   # Beta (Type II error rate)
+```
+
+# Unit 5
+
+Rank-Sum Test (Mann-Whitney U test) is used when the samples are independent, and paired = FALSE (default).
+Signed-Rank Test is used when the samples are paired/dependent, and you must specify paired = TRUE.
+
+## Rank-Sum Test
+
+```{r}
+logging <- read.csv()
+wilcox.test(Score ~ Group, data=logging, conf.int=T, alternative='greater', conf.level = .9, paired = FALSE)
+```
+
+```{r}
+# Two independent groups
+group1 <- c(10, 15, 20)
+group2 <- c(5, 18, 30)
+
+# Wilcoxon rank-sum test (Mann-Whitney U test)
+wilcox.test(group1, group2, paired = FALSE, conf.level = .90, conf.int = TRUE)
+```
+
+
+https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/wilcox.test
+
+## Signed Rank Test
+
+```{r}
+# Paired samples (before and after treatment, for example)
+before <- c(85, 90, 78, 92, 88)
+after <- c(87, 85, 80, 89, 90)
+
+# Wilcoxon signed-rank test (for paired data)
+wilcox_test_result <- wilcox.test(before, after, paired = TRUE, conf.level = .90, conf.int = TRUE)
+print(wilcox_test_result)
+```
+
+# Unit 6
+
+## Basic ANOVA
+
+### Critical value
+
+```{r}
+pf(0.56, df1 = 4, df2 = 27)
+```
+
+
+```{r}
+fit = aov(Income2005 ~ Educ, data = data_log)
+summary(fit)
+```
+
+### Example ESS from review
+
+```{r}
+moderna = read.csv("ModernaStudy.csv", header = TRUE)
+fit = lm(Score~Drug, data = moderna)
+anova(fit)
+# Group ctrl and d together for reduced model
+moderna$ctrl_and_d <- ifelse(moderna$Drug %in% c("CTRL", "D"), "ctrlandd", moderna$Drug)
+fit2 = lm(Score~ctrl_and_d, data = moderna)
+anova(fit2)
+```
+
+# Unit 7
+
+## Dunnett example from review
+
+```{r}
+library(multcomp)
+Moderna = read.csv("ModernaStudy.csv", header = TRUE, stringsAsFactors = TRUE)
+Moderna
+Moderna$Drug = relevel(Moderna$Drug, ref = "D")
+fit = lm(Score~Drug, data = Moderna)
+gfit = glht(fit, linfct = mcp(Drug = "Dunnett"))
+summary(gfit)
+confint(gfit)
+```
+
+contrast
+
+```{r}
+leastsquares = lsmeans(fit,"Drug")
+Contrast = list("NewVsTraditional" = c(-1/3,1/2,1/2,-1/3,0,-1/3))
+contrast(leastsquares,Contrast)
+```
+
+
+## For MC use SAS and this link
+
+https://chatgpt.com/share/670ac2ab-8590-8010-9713-8dfb00b16c1e
+

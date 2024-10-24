@@ -1,0 +1,42 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+For Live Session: Calculate the correlation coefficient for the data Professor Sadler included in the previous lightboard lecture, and then plot the data. Then give a brief explanation as to what the value that you calculate for the correlation coefficient means for the data set. You may do this on paper and / or in Excel.  Either way, please add it to your FLS PowerPoint. 
+
+For Live Session
+Use SAS and R to plot the data and find the linear correlation coefficient r for the speed and MPG data. Please add a screenshot of the output and your code to the FLS PowerPoint deck.
+
+```{r}
+
+
+study_time = data.frame(score = c(34, 56, 45, 70, 55, 68, 67, 79, 45, 89, 95, 78, 94), hours = c(1, 1, 2, 2, 2, 3, 4, 4, 4, 6, 7, 7, 8))
+cor(study_time)
+cor.test(study_time$hours, study_time$score)
+fit = lm(score~hours, data = study_time)
+summary(fit)
+```
+
+```{r}
+SwimTemp = data.frame(swimsuits = c(5,10,15,17,20,30,37,38,45,55), temperature = c(64,62,68,70,71,80,82,85,87,92))
+fit = lm(swimsuits~temperature, data = SwimTemp)
+summary(fit)
+```
+
+https://www.rossmanchance.com/applets/2021/regshuffle/regshuffle.htm
+
+# Question
+
+
+Speed MPG
+
+20   24
+
+30   28
+
+40   30
+
+50  28
+
+60  24

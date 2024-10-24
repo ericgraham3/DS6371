@@ -1,7 +1,7 @@
 ---
-title: "Week  FLS"
+title: "Module 9 FLS"
 author: "Eric Graham"
-date: "2024- - "
+date: "2024-10-23"
 output: 
   powerpoint_presentation:
     slide_level: 2
@@ -9,47 +9,120 @@ output:
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = "hide")
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, results = 'markup')
 library(dplyr)
 library(ggplot2)
 library(ggthemes)
 library(scales)
 ```
 
-For Live Session: Calculate the correlation coefficient for the data Professor Sadler included in the previous lightboard lecture, and then plot the data. Then give a brief explanation as to what the value that you calculate for the correlation coefficient means for the data set. You may do this on paper and / or in Excel.  Either way, please add it to your FLS PowerPoint. 
+# QQQ
 
-For Live Session
-Use SAS and R to plot the data and find the linear correlation coefficient r for the speed and MPG data. Please add a screenshot of the output and your code to the FLS PowerPoint deck.
+## Answers
+
+1. B
+2. A (this new pair introduces more variance than the 1,3 pair)
+3. B
+4. A
+
+# Question 1: Speed/MPG Correlation in Excel
+
+![Excel shows 0 correlation](1.png)
+
+# Question 2: Speed/MPG Correlation in R and SAS
+
+R also shows zero correlation.
 
 ```{r}
+speed = c(20, 30, 40, 50, 60)
+mpg = c(24, 28, 30, 28, 24)
+cor.test(speed, mpg)
+```
 
+---
 
-study_time = data.frame(score = c(34, 56, 45, 70, 55, 68, 67, 79, 45, 89, 95, 78, 94), hours = c(1, 1, 2, 2, 2, 3, 4, 4, 4, 6, 7, 7, 8))
-cor(study_time)
-cor.test(study_time$hours, study_time$score)
-fit = lm(score~hours, data = study_time)
+SAS shows a very small correlation coefficient, which leads me to think that it might be using a different, more exact calculation (or that R and Excel don't deem the value to be significant enough to report).
+
+![Results from SAS](2.1.png)
+
+---
+
+![Code from SAS](2.2.png)
+
+# Question 3: Swimsuit/Temperature Correlation in R
+
+```{r}
+SwimTemp = data.frame(swimsuits = c(5, 10, 15, 17, 20, 30, 37, 38, 45, 55), temperature = c(64, 62, 68, 70, 71, 80, 82, 85, 87, 92))
+fit = lm(swimsuits ~ temperature, data = SwimTemp)
 summary(fit)
 ```
 
-```{r}
-SwimTemp = data.frame(swimsuits = c(5,10,15,17,20,30,37,38,45,55), temperature = c(64,62,68,70,71,80,82,85,87,92))
-fit = lm(swimsuits~temperature, data = SwimTemp)
-summary(fit)
-```
+---
 
-https://www.rossmanchance.com/applets/2021/regshuffle/regshuffle.htm
+We see the intercept of the linear regression line to be 1.54867, and the slope to be -90.65391, so the formula of our line is:
 
-# Querstion
+$$\hat{\text{Swimsuit Sales}} = 1.54867 - 90.65391 \times \text{Temperature}$$
 
-wtf is bivariate normal distribution, where is the bell?
-Speed MPG
+# Question 4: Test Statistic and Confidence Interval for Hypothesis Test on Intercept
 
-20   24
+## Step 1: Hypothesis
 
-30   28
+In a six-step hypothesis test for the slope and intercept of a linear regression line, our null hypothesis assumes that the slope (or, as is the case here, the intercept) is equal to 0. In the case of the slope, this would imply no linear relationship; in the case of the intercept, the null hypothesis doesn't have implications for the existence of a linear relationship, but testing the intercept is still important to interpreting a model.
 
-40   30
+$$H_0: \hat{\beta}_0 = 0$$
+$$H_0: \hat{\beta}_0 \neq 0$$
 
-50  28
+## Step 2: Critical Value
 
-60  24
+We want to see whether our test statistic meets or exceeds the critical value associated with our significance level (i.e., whether it lies in the shaded region of this drawing).
+
+![](4.1.jpg)
+
+---
+
+Our critical value will be:
+
+$$\pm t_{1 - \frac{\alpha}{2}, df}$$
+
+Where the degrees of freedom are equal to:
+
+$$n-2$$
+
+## Test Statistic and Confidence Interval
+
+Our test statistic in this case (where the "assumed value" of our null hypothesis is 0) would be:
+
+$$t = \frac{\hat{\beta_0}-0}{SE(\hat{\beta_0})}$$
+
+The standard error of our intercept is estimated by:
+
+$$\hat{\sigma} \times \sqrt{\frac{1}{(n-1)\times S_x^2}}$$
+
+A confidence interval can be obtained:
+
+$$\hat{\beta_0} \pm  t_{1 - \frac{\alpha}{2}, df} \times SE(\hat{\beta_0})$$
+
+
+# Takeaways
+
+1. Pearson's R (a/k/a the correlation coefficient) is a statistic that measures the strength of the linear relationship between an explanatory variable (x) and a response variable (y). R^2 is the proportion of the variance in a response variable that is explained by its relationship with the explanatory variable.
+
+2. R and R^2 don't measure non-linear relationships (like curvilinear), and they are very sensitive to outliers.
+
+3. A linear regression model is a formula for a line (in slope/intercept form) which fits a linear relationship. It can be used to predict values based on an observed linear relationship, though care must be taken when doing this outside the range of the original data.
+
+4. Hypothesis tests can be used to assess whether a linear model built from a sample is statistically likely to represent an actual relationship, or whether the observed relationship could be explained by chance. I think this is the case, see my question below!
+
+# Questions
+
+1. I am struggling with the concept of the bivariate normal distribution, what statistic/relationship between the pairs is supposed to be normally distributed?
+
+2. When calculating the standard error for the slope/intercept test, where do we find the (what I believe to be) population variance:
+
+$$S_x^2$$
+
+3. For hypothesis testing of linear regression line slope/intercept, am I right in thinking that we would have a sample of X and Y values that we think are correlated; we have fit them to a linear regression line; and we are testing whether there is evidence that the slope and intercept shown in our model are due to that relationship, and not chance?
+
+4. Why did SAS find a small correlation coefficient, whereas Excel and R found 0 correlation?
+
+5. Looking forward to the lecture on this, the concepts are big and I'm trying to get my mind wrapped around them!

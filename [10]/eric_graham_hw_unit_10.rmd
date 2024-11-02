@@ -1,0 +1,237 @@
+---
+title: "Unit 10 Homework"
+author: "Eric Graham"
+date: "2024-11-01"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+library(investr)
+```
+
+# Question 1: Black-Eared Wheatears
+
+## 1a: Plot of 99% Confidence and Prediction Intervals
+
+I borrowed [this solution](https://stackoverflow.com/questions/69881144/plotting-99-confidence-interval-and-prediction-interval-struggle-in-r).
+
+```{r}
+wheatears = read.csv("Male Display Data Set.csv", header = TRUE)
+
+fit = lm(Tcell ~ Mass, data = wheatears)
+
+n_data = seq(min(wheatears$Mass), max(wheatears$Mass), by = 0.1)
+
+conf_int = predict(fit, newdata = list(Mass = n_data), interval = "confidence", level = 0.99)
+pred_int = predict(fit, newdata = list(Mass = n_data), interval = "prediction", level = 0.99)
+
+y_min = min(c(wheatears$Tcell, pred_int[, "lwr"]))
+y_max = max(c(wheatears$Tcell, pred_int[, "upr"]))
+
+plot(wheatears$Mass, wheatears$Tcell, pch = 20, cex = 1, col = "blue",
+     xlab = "Mass", ylab = "Tcell",
+     main = "Confidence Intervals and Prediction Intervals",
+     ylim = c(y_min, y_max))
+
+abline(fit, lwd = 2, col = "red")
+
+matlines(n_data, conf_int[, 2:3], lty = "dashed", col = "red", lwd = 2)
+
+matlines(n_data, pred_int[, 2:3], lty = "dashed", col = "green", lwd = 2)
+```
+
+## 1b: T-Statistics and P-Values for Slope and Intercept
+
+```{r}
+summary(fit)
+```
+
+As shown in the R output above, the t-statistic and p-value for the slope and intercept are as follows:
+
+|  | t-stat | p-value |
+|------|--------|---------|
+| Intercept | 1.112 | 0.27996 |
+| Slope | 3.084 | 0.00611 |
+
+## 1c: Hypothesis Testing
+
+### Hypothesis Test for Slope
+
+#### Step 1: Problem Statement
+
+We fit a linear model to the dataset measuring the t-cell count of Black-Eared Wheatears and the mass of stones that they carry as a mating display. The regression line of our model has an observed slope of .03282, and we want to test whether this is statistically significant based on the available data.
+
+Our null hypothesis is that the slope of the regression line is equal to zero, while the alternative hypothesis is that the slope is not equal to zero.
+
+$$H_0: \hat{\beta}_1 = 0$$
+
+$$H_0: \hat{\beta}_1 \neq 0$$
+
+#### Step 2 and 3: Critical Value
+
+R shows our critical value to be +/- 2.860935.
+
+```{r}
+df = nrow(wheatears) - 2
+qt(.01/2, df)
+```
+
+![Critical Value](1_c_01.png)
+
+#### Step 3, 4 and 5: Test Statistic, P-value, and Conclusion
+
+Our test statistic for the slope, as given in the summary of our model above, is 3.084. This is greater than the critical value, which is reflected in the p-value of 0.00611 (also given in the summary above). Therefore, we reject the null hypothesis and conclude that the slope of the regression line is statistically significant.
+
+#### Step 6: Conclusion
+
+```{r}
+confint(fit)
+```
+
+There is strong statistical evidence (p-value of 0.00611) to suggest that the slope of the regression line for the relationship between stone mass and t-cell count is not equal to zero. We are 99% confident that the true slope lies between 0.01054860 and 0.05509438.
+
+### Hypothesis Test for Intercept
+
+#### Step 1: Problem Statement
+
+We fit a linear model to the dataset measuring the t-cell count of Black-Eared Wheatears and the mass of stones that they carry as a mating display. The regression line of our model has an observed intercept of 0.08750, and we want to test whether this is statistically significant based on the available data.
+
+Our null hypothesis is that the intercept of the regression line is equal to zero, while the alternative hypothesis is that the intercept is not equal to zero.
+
+$$H_0: \hat{\beta}_0 = 0$$
+
+$$H_0: \hat{\beta}_0 \neq 0$$
+
+#### Step 2 and 3: Critical Value
+
+R shows our critical value to be +/- 2.860935.
+
+```{r}
+df = nrow(wheatears) - 2
+qt(.01/2, df)
+```
+
+![Critical Value](1_c_01.png)
+
+#### Step 3, 4 and 5: Test Statistic, P-value, and Conclusion
+
+Our test statistic for the intercept, as given in the summary of our model above, is 1.112. This is less than the critical value, which is reflected in the p-value of 0.27996 (also given in the summary above). Therefore, we fail reject the null hypothesis and conclude that the intercept of the regression line is not statistically significant.
+
+#### Step 6: Conclusion
+
+```{r}
+confint(fit)
+```
+
+There is insufficient evidence (p-value of 0.27996) to suggest that the intercept of the regression line for the relationship between stone mass and t-cell count is different from zero. We are 99% confident that the true intercept lies between -0.07717487 and 0.25216884. Because zero is within this range of plausible values, we fail to reject the null hypothesis.
+
+## 1d: Regression Equation
+
+The regression equation is as follows:
+
+$$\hat{\text{t-cell}} = 0.08750 + 0.03282 \times \text{mass}$$
+
+While the observed intercept is not statistically significant, there is sufficient evidence to suggest that the slope is statistically-significant, and thus that there is a linear relationship between the mass of the stones carried as part of the mating display and the t-cell count. 
+
+## 1e: Interpretation of Slope
+
+The slope of the regression line is 0.03282. This means that for every additional unit of mass that a Black-Eared Wheatear carries, the t-cell count increases by 0.03282 units. This suggests that there is a positive relationship between the mass of the stones carried and the t-cell count.
+
+## 1f: Interpretation of Intercept
+
+The intercept of the regression line is 0.08750. This means that, hypothetically, when the mass of the stones carried is zero, the t-cell count would be 0.08750. However, because the intercept is not statistically significant, we must use caution when interpreting this value. 
+
+It is unclear whether such a zero-value is practically plausible, but it would certainly be extrapolation to make predictions on the t-cell value of a Black-Eared Wheatear carrying no stones, as no such measurements were found in our dataset. The question of the existence of Black-Eared Wheatears with zero game is beyond the scope of this analysis.
+
+## 1g: Confidence Interval for Mass 4.5kg
+
+As shown in this R output, the 99% **confidence** interval for the **mean** t-cell count of a bird carrying a stone weighing 4.5 kg is between 0.1385665 and 0.3318209.
+
+```{r}
+newpoint = data.frame(Mass = 4.5)
+
+conf_interval = predict(fit, newdata = newpoint, interval = "confidence", level = 0.99)
+conf_interval
+```
+
+
+## 1h: Prediction Interval for Mass 4.5kg
+
+As shown in this R output, the 99% **prediction** interval for the **predicted** t-cell count of a bird carrying a stone weighing 4.5 kg is between -0.01593192 0.4863193. Note that this range is much wider than the confidence interval for the mean, as a prediction interval accounts for the additional uncertainty (sigma) of the individual prediction.
+
+```{r}
+pred_interval = predict(fit, newdata = newpoint, interval = "prediction", level = 0.99)
+pred_interval
+```
+
+## 1i: Calibration Intervals for T-Cell Response of 0.3
+
+### Part 1: Graphical Method
+
+NOTE: I feel like these answers are wrong, that I'm looking at this wrong, but this is my best effort.
+
+a. Graphical examination of the confidence interval for the mean (shown in 1a above) suggests that the estimated calibration interval for a t-cell response of 0.3 would be between 6.5 kg and 10 kg. It looks like a t-cell response of 0.3 is plausible within the mean confidence interval for all explanatory values over 6.5. 
+
+b. Graphical examination of the prediction interval for specific values (shown in 1a above) suggests that the estimated prediction interval for a t-cell response of 0.3 includes the entire range of explantory values. That is to say, it looks to me like 0.3 is plausibly within the prediction interval for the entire graph.
+
+### Part 2: Using R
+
+a. R shows that the estimated *confidence* interval for a *mean* t-cell response of 0.3 is between 4.7912957 kg and 8.1577210 kg.
+
+```{r}
+calib_interval_mean = calibrate(fit, y0 = 0.3, interval = "Wald", mean.response = TRUE, level = 0.99)
+calib_interval_mean
+```
+
+b. R shows that the estimated *prediction* interval for a *predicted* t-cell response of 0.3 is between -0.785495 kg and 13.734512 kg.
+
+```{r}
+calib_interval_single = calibrate(fit, y0 = 0.3, interval = "Wald", mean.response = FALSE, level = 0.99)
+calib_interval_single
+```
+
+### Part 3: Interpretation
+
+a. We are 99% confident that the weight of stones that would need to be carried by Black-Eared Wheatears to achieve a mean t-cell response of 0.3 is between 4.7912957 kg and 8.1577210 kg. Our best estimate is 6.4745084 kg.
+
+b. We are 99% confident that the weight of stones that would need to be carried by a Black-Eared Wheatear to achieve a t-cell response of 0.3 is between -0.785495 kg and 13.734512 kg. Our best estimate is 6.474508 kg.
+
+## 1j: Scatterplot of Residuals
+
+```{r}
+ggplot(wheatears, aes(x = Mass, y = fit$residuals)) +
+  geom_point() +
+  theme_few() +
+  labs(title = "Residuals vs Mass", x = "Mass", y = "Residuals")
+```
+
+A visual examination of this plot shows that there are some outliers on both the lower and higher ends of the x axis, and some heteroscedasticity in the residuals above 6 kg.
+
+## 1k: Histogram of Residuals with Normal Curve
+
+```{r}
+ggplot(wheatears, aes(x = fit$residuals)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightblue", color = "black") +
+  stat_function(fun = dnorm, args = list(mean = mean(fit$residuals), sd = sd(fit$residuals)), color = "red") +
+  theme_few() +
+  labs(title = "Histogram of Residuals with Normal Curve", x = "Residuals", y = "Density")
+```
+
+A visual examination of this histogram suggests that the sample might not meet the normality assumption of the linear regression model (the residuals appear to be skewed to the left). Again, we see some outliers on both the left and right end of the distribution.
+
+## 1l: R-Squared
+
+The proportion of variance in a response variable that is explained by the explanatory variable is the R-squared value. In this case, the proportion of variance in the t-cell count (response variable) that is explained by the mass of the stones carried (explanatory variable) is 0.3336345. While a high R-squared value alone is not a sufficient measure of a model's goodness-of-fit, this low value does suggest that our specific model is not a great fit, in that our explanatory variable only accounts for about 33% of the variance seen in the t-cell values.
+
+```{r}
+summary(fit)$r.squared
+```
+

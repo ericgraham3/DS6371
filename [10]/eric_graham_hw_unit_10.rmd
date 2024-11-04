@@ -21,7 +21,7 @@ library(investr)
 
 ## 1a: Plot of 99% Confidence and Prediction Intervals
 
-I borrowed [this solution](https://stackoverflow.com/questions/69881144/plotting-99-confidence-interval-and-prediction-interval-struggle-in-r).
+I'm sorry this doesn't look nicer, I tried using ggplot and got stuck so I used [this solution](https://stackoverflow.com/questions/69881144/plotting-99-confidence-interval-and-prediction-interval-struggle-in-r) from Stack Overflow.
 
 ```{r}
 wheatears = read.csv("Male Display Data Set.csv", header = TRUE)
@@ -143,17 +143,18 @@ While the observed intercept is not statistically significant, there is sufficie
 
 ## 1e: Interpretation of Slope
 
-The slope of the regression line is 0.03282. This means that for every additional unit of mass that a Black-Eared Wheatear carries, the t-cell count increases by 0.03282 units. This suggests that there is a positive relationship between the mass of the stones carried and the t-cell count.
+The slope of the regression line is 0.03282. This means that for every additional g of mass that a Black-Eared Wheatear carries, the t-cell count increases by 0.03282. This suggests that there is a positive relationship between the mass of the stones carried and the t-cell count.
 
 ## 1f: Interpretation of Intercept
 
 The intercept of the regression line is 0.08750. This means that, hypothetically, when the mass of the stones carried is zero, the t-cell count would be 0.08750. However, because the intercept is not statistically significant, we must use caution when interpreting this value. 
 
-It is unclear whether such a zero-value is practically plausible, but it would certainly be extrapolation to make predictions on the t-cell value of a Black-Eared Wheatear carrying no stones, as no such measurements were found in our dataset. The question of the existence of Black-Eared Wheatears with zero game is beyond the scope of this analysis.
+It is unclear whether such a zero-value is realistic, but it would certainly be extrapolation to predict the t-cell value of a Black-Eared Wheatear that carries no stones, as no such measurements were found in our dataset. The question of the existence of a Swagless Black-Eared Wheatear is beyond the scope of this analysis.
 
-## 1g: Confidence Interval for Mass 4.5kg
+## 1g: Confidence Interval for Mass 4.5g
 
-As shown in this R output, the 99% **confidence** interval for the **mean** t-cell count of a bird carrying a stone weighing 4.5 kg is between 0.1385665 and 0.3318209.
+As shown in this R output, the 99% **confidence** interval for the **mean** t-cell count of a bird carrying a stone weighing 4.5 g is between 0.1385665 and 0.3318209. Our best guess is that it would be 0.2351937.
+
 
 ```{r}
 newpoint = data.frame(Mass = 4.5)
@@ -163,9 +164,9 @@ conf_interval
 ```
 
 
-## 1h: Prediction Interval for Mass 4.5kg
+## 1h: Prediction Interval for Mass 4.5g
 
-As shown in this R output, the 99% **prediction** interval for the **predicted** t-cell count of a bird carrying a stone weighing 4.5 kg is between -0.01593192 0.4863193. Note that this range is much wider than the confidence interval for the mean, as a prediction interval accounts for the additional uncertainty (sigma) of the individual prediction.
+As shown in this R output, the 99% **prediction** interval for the **predicted** t-cell count of a bird carrying a stone weighing 4.5 g is between -0.01593192 0.4863193. Our best guess is that it would be 0.2351937. Note that this range is much wider than the confidence interval for the mean, as a prediction interval accounts for the additional uncertainty (sigma) of the individual prediction. Also note that it isn't practical/possible for a bird to carry negative weight in stones.
 
 ```{r}
 pred_interval = predict(fit, newdata = newpoint, interval = "prediction", level = 0.99)
@@ -178,20 +179,20 @@ pred_interval
 
 NOTE: I feel like these answers are wrong, that I'm looking at this wrong, but this is my best effort.
 
-a. Graphical examination of the confidence interval for the mean (shown in 1a above) suggests that the estimated calibration interval for a t-cell response of 0.3 would be between 6.5 kg and 10 kg. It looks like a t-cell response of 0.3 is plausible within the mean confidence interval for all explanatory values over 6.5. 
+a. Graphical examination of the confidence interval for the mean (shown in 1a above) suggests that the estimated calibration interval for a t-cell response of 0.3 would be between 6.5 g and 10 g. It looks like a t-cell response of 0.3 is plausible within the mean confidence interval for all explanatory values over 6.5. 
 
 b. Graphical examination of the prediction interval for specific values (shown in 1a above) suggests that the estimated prediction interval for a t-cell response of 0.3 includes the entire range of explantory values. That is to say, it looks to me like 0.3 is plausibly within the prediction interval for the entire graph.
 
 ### Part 2: Using R
 
-a. R shows that the estimated *confidence* interval for a *mean* t-cell response of 0.3 is between 4.7912957 kg and 8.1577210 kg.
+a. R shows that the estimated *confidence* interval for a *mean* t-cell response of 0.3 is between 4.7912957 g and 8.1577210 g.
 
 ```{r}
 calib_interval_mean = calibrate(fit, y0 = 0.3, interval = "Wald", mean.response = TRUE, level = 0.99)
 calib_interval_mean
 ```
 
-b. R shows that the estimated *prediction* interval for a *predicted* t-cell response of 0.3 is between -0.785495 kg and 13.734512 kg.
+b. R shows that the estimated *prediction* interval for a *predicted* t-cell response of 0.3 is between -0.785495 g and 13.734512 g.
 
 ```{r}
 calib_interval_single = calibrate(fit, y0 = 0.3, interval = "Wald", mean.response = FALSE, level = 0.99)
@@ -200,9 +201,9 @@ calib_interval_single
 
 ### Part 3: Interpretation
 
-a. We are 99% confident that the weight of stones that would need to be carried by Black-Eared Wheatears to achieve a mean t-cell response of 0.3 is between 4.7912957 kg and 8.1577210 kg. Our best estimate is 6.4745084 kg.
+a. We are 99% confident that the weight of stones that would need to be carried by Black-Eared Wheatears to achieve a mean t-cell response of 0.3 is between 4.7912957 g and 8.1577210 g. Our best estimate is 6.4745084 g.
 
-b. We are 99% confident that the weight of stones that would need to be carried by a Black-Eared Wheatear to achieve a t-cell response of 0.3 is between -0.785495 kg and 13.734512 kg. Our best estimate is 6.474508 kg.
+b. We are 99% confident that the weight of stones that would need to be carried by a Black-Eared Wheatear to achieve a t-cell response of 0.3 is between -0.785495 g and 13.734512 g. Note that it isn't possible for a bird to carry negative g of stones. Our best estimate is 6.474508 g.
 
 ## 1j: Scatterplot of Residuals
 
@@ -210,10 +211,11 @@ b. We are 99% confident that the weight of stones that would need to be carried 
 ggplot(wheatears, aes(x = Mass, y = fit$residuals)) +
   geom_point() +
   theme_few() +
-  labs(title = "Residuals vs Mass", x = "Mass", y = "Residuals")
+  labs(title = "Residuals vs Mass", x = "Mass", y = "Residuals") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red")
 ```
 
-A visual examination of this plot shows that there are some outliers on both the lower and higher ends of the x axis, and some heteroscedasticity in the residuals above 6 kg.
+A visual examination of this plot shows that there are some outliers on both the lower and higher ends of the x axis, and some heteroscedasticity in the residuals above 6 g.
 
 ## 1k: Histogram of Residuals with Normal Curve
 
@@ -235,3 +237,36 @@ The proportion of variance in a response variable that is explained by the expla
 summary(fit)$r.squared
 ```
 
+# Question 2: Black-Eared Wheatears in Excel
+
+I have also submitted my spreadsheet for this question.
+
+## 2a: Slope and Intercept
+
+![](2_a_1.png)
+
+## 2b: T-Stat and P-Value for Slope and Intercept
+
+![](2_b_1.png)
+
+## 2c: 99% Confidence Interval for Mean T-Cell Count
+
+![](2_c_1.png)
+
+## 2d: 99% Prediction Interval for Predicted T-Cell Count
+
+![](2_d_1.png)
+
+## 2e: Plot for Confidence and Prediction Intervals
+
+![](2_e_1.png)
+
+## 2f: Calibration Intervals for T-Cell Response of 0.3
+
+### Calculated in Excel
+
+![](2_f_1.png)
+
+### Graphical Interpretation
+
+A visual examination of the graph would lead me to estimate an interval of 3 to 7 for the mean (which I know is wrong), and 3 to 10 for the prediction. Even aside from knowing the calculated range from the prior question, it is obvious from the graph that the prediction interval is wider than the confidence interval, and the prediction interval encompasses all points shown on our graph. As above, I am a little shaky on the visual interpretation, I feel like I'm missing something and will ask about this in office hours or class.

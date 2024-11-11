@@ -1,0 +1,190 @@
+---
+title: "Week 3 FLS"
+author: "Eric Graham"
+date: "2024-09-09"
+output: word_document
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(ggthemes)
+options(scipen=999)
+```
+
+# Question 1: Metabolic Rate and Lifespan
+
+## 1a: Analysis of Scatterplot
+
+Based on the below scatterplot, there appears to be a positive linear relationship between metabolic rate and mass (raised to the 3/4 power). However, I do note that there are some large outliers which would indicate that this might be an exponential relationship.
+
+![Scatterplot of Metabolic Rate vs Mass^(3/4)](01.01.png)
+
+## 1b: Finding the Best Model
+
+### Assumptions of Linear Model
+
+#### Linearity
+
+A visual examination of the scatterplot shows a linear relationship, and the p-value given for both the slope (<.0001) and intercept (.0265) confirm the likelihood of a linear relationship.
+
+![Summary of linear regression model (original data)](01.01.01.png)
+
+#### Normality
+
+This histogram of the distribution of residuals shows that the residuals are almost normal, but there is some right skewness (likely caused by the outliers in the original data). 
+
+![Histogram of Residuals](01.03.png)
+
+#### Variance of Residuals
+
+As we can see in this scatterplot of residuals, there is evidence of heteroscedasticity. The spread of the residuals increases as mass^(3/4) increases.
+
+![Scatterplot of Residuals](01.02.png)
+
+#### Independence
+
+Because we are analyzing the relationship between metabolic rate and mass at the species level, I assume that the data points are independent of each other.
+
+## Log-Log Transformation
+
+Based on the fact that the given measure of mass is mass^(3/4), and because of the apparent heteroscedasticity, I took the log of both sides to linearize the relationship. The scatterplot of log(metabolic rate) vs log(mass) shows that the linear model persists with less outliers and less heteroscedasticity. 
+
+![Scatterplot of Log(Metabolic Rate) vs Log(Mass)](01.04.png)
+
+The scatterplot of residuals on the log-transformed data shows a more consistent variance.
+
+![Scatterplot of Residuals (Log-Transformed Model)](01.05.png)
+
+The histogram of residuals on the log-transformed data shows a more normal distribution.
+
+![Histogram of Residuals (Log-Transformed Model)](01.06.png)
+
+By mitigating the violations of the variance and normality assumptions, the log-log transformation on this data creates a better fit.
+
+## 1c: Test-Statistic and P-Value for Transformed Data
+
+The summary below shows p-values of <0.0001 for both the slope and intercept, indicating that the linear model is statistically significant.
+
+![Summary of linear regression model (log-transformed data)](01.07.png)
+
+## 1d: Linear Model Equation
+
+$$\hat{\text{Predicted median }\log(\text{Metabolism})} = 5.83383 + 0.98449 \times \log(\text{mass}^{3/4})$$
+
+
+## 1e: Interpretation
+
+For each 1% increase in mass, the predicted metabolic rate increases by 0.98449%. We are 95% certain that the true percentage by which metabolic rate increases for a 1% increase in mass is between 0.94823% and 102.070%. We are 95% certain that the true intercept of the regression line (which is the hypothetical metabolic rate of a species with a mass of 0 grams) is between 5.54481 and 5.73185. Of course, such a weightless creature doesn't exist, that interpretation is only provided for completeness.
+
+## 1f: Proportion of Variance Explained by Relationship
+
+The r-squared value is 0.9649, which means that 96.49% of the variance in log-adjusted metabolic rate can be explained by the relationship with log-adjusted mass^(3/4).
+
+# Question 2: Autism by Year
+
+## 2a: Assumptions of Linear Model
+
+DISCLAIMER: I apologize for how heinous these histograms appear, given so few data points it was hard to get a reasonable scale. I included them for the sake of completeness, since the assignment called for them.
+
+```{r}
+autism = read.csv("Autism Data Prob 29.csv")
+
+ggplot(autism, aes(x = Year, y = Prevalence)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Scatterplot of Year vs Prevalence", x = "Year", y = "Prevalence")
+
+fit = lm(Prevalence ~ Year, data = autism)
+
+summary(fit)
+
+ggplot(autism, aes(x = Year, y = residuals(fit))) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Scatterplot of Residuals", x = "Year", y = "Residuals")
+
+residuals_df = data.frame(Residuals = residuals(fit))
+
+ggplot(residuals_df, aes(x = Residuals)) +
+  geom_histogram(fill = "skyblue", color = "black") +
+  stat_function(fun = dnorm, args = list(mean = mean(residuals_df$Residuals), sd = sd(residuals_df$Residuals)), 
+                color = "red", linetype = "dashed") +
+  labs(title = "Histogram of Residuals", x = "Residuals", y = "Frequency") +
+  theme_few()
+```
+
+### Linearity
+
+We don't have a lot of data to work with, but based on the scatterplot above the relationship is generally linear but doesn't fit especially closely.
+
+### Normality
+
+It is difficult to interpret the above histogram of residuals, in part because we have so few data points and in part because I had a hard time scaling it properly in R. However, it does appear to be right-skewed. 
+
+### Variance
+
+It is difficult to interpret variance because we only had one measurement per year, and only five observations total.
+
+### Independence
+
+It isn't given that the data here is independent, but for the purposes of our question I will assume it is. 
+
+### Log-Transformation
+
+Given the right-skewness of the residuals, I will take the log of the response variable (it seems inappropriate to transform the calendar year). The log transformed data fits the regression line much more closely. Unfortunately, it does little to mitigate the apparent violation of variance. In my judgment, both models are flawed in that (with so little data) we can't get a good read on whether there is equal variance for each response. 
+
+In the spirit of the question, I will proceed with the log-transformed data because it visually fits the regression line better, and because the p-values for the slope and intercept are both smaller than those of the original data. 
+
+```{r}
+autism$log_Prevalence = log(autism$Prevalence)
+
+ggplot(autism, aes(x = Year, y = log_Prevalence)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE, color = "blue") +
+  labs(title = "Scatterplot of Year vs Log(Prevalence) with Regression Line", x = "Year", y = "Log(Prevalence)") +
+  theme_few()
+
+fit_log = lm(log_Prevalence ~ Year, data = autism)
+
+ggplot(autism, aes(x = Year, y = residuals(fit_log))) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Scatterplot of Residuals (Log-Transformed Model)", x = "Year", y = "Residuals") +
+  theme_few()
+
+ggplot(autism, aes(x = residuals(fit_log))) +
+  geom_histogram(fill = "skyblue", color = "black") +
+  stat_function(fun = dnorm, args = list(mean = mean(residuals(fit_log)), sd = sd(residuals(fit_log))), color = "red", linetype = "dashed") +
+  labs(title = "Histogram of Residuals (Log-Transformed Model)", x = "Residuals", y = "Frequency") +
+  theme_few()
+
+summary(fit_log)
+```
+
+## 2b: Test Statistics and P-Values for Log-Transformed Data
+
+The p-values for the slope and intercept of the log-transformed data are both <0.0001, indicating that the linear model for the log-transformed data is statistically significant.
+
+## 2c: Linear Model Equation
+
+$$\hat{\text{Predicted median }\log(\text{Autism cases})} = -407.97 + 0.2054 \times \text{Year}$$
+
+## 2d: Interpretation
+
+```{r}
+confint(fit_log)
+exp(.2054)
+exp(.1975)
+exp(.2133)
+```
+
+The median number of autism cases per 10000 10-year olds increases by approximately 22.8% per year (after backtransforming the slope, as shown in code above). We are 95% certain that the true percentage increase in autism cases per year is between 21.84% and 23.78%.
+
+As noted above, the scope of the data is limited. I present this model as more descriptive of the rate of increase of autism over the time period.
+
+## 23: Proportion of Variance Explained by Relationship
+
+The r-squared value of 0.9996 means that 99.96% of the variation in the log-transformed Autism rate is accounted for by the year.

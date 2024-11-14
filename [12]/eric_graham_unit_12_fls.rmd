@@ -1,0 +1,136 @@
+---
+title: "Unit 12 FLS"
+author: "Eric Graham"
+date: "2024-11-14"
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+    reference_doc: presentation.pptx
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = "hide")
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(scales)
+```
+
+# QQQ
+
+## Answers
+
+1. True (wouldn't this be a use of feature interactions?)
+2. b (one with no interaction, one with interaction for bird*mass, one with interaction for bat*mass)
+3. a
+
+# Question 1: HSB2
+
+## Model 1: SES as Categorical Variable
+
+I based my approach on the anorexia example from the lectures. I created new variables: d1 (for SES = 1) and d2 (for SES = 2). 
+
+![SAS results for Model 1](fls_model_1_results.png)
+
+---
+
+The reference level is SES = 3. The general model is:
+
+$$\text{Science Score} = 19.9103 + 0.83265 \times \text{Math} - 3.31621 \times \text{d1} - 1.23651 \times \text{d2}$$
+
+---
+
+So for SES 3, which is effectively the "control," there is no effect from the categorical variable:
+
+$$\text{Science Score} = 19.9103 + 0.83265 \times \text{Math}$$
+
+This is the basis upon which we will compare the effects of the other SES groups.
+
+---
+
+For SES 1, the d2 term is removed:
+
+$$\text{Science Score} = 19.9103 + 0.83265 \times \text{Math} - 3.31621$$
+
+Those in SES 1 will have an expected mean science score 3.31621 points lower than those in SES 3.
+
+---
+
+For SES 2, the d1 term is removed:
+
+$$\text{Science Score} = 19.9103 + 0.83265 \times \text{Math} - 1.23651$$
+
+Those in SES 2 will have an expected mean science score 1.23651 points lower than those in SES 3.
+
+## Assumptions for Model 1
+
+Linearity: The scatterplot of residuals vs. predicted values shows a linear relationship.
+Variance: The residual plot appears to show consistent variance.
+Normality: The histogram and Q-Q plot of residuals suggest the residuals are fairly normal.
+
+![Plots for Model 1](fls_model_1_plot.png)
+
+## Model 2: Interaction Between SES and Math
+
+Model 2 introduces an interaction term between SES and Math to potentially allows for different slopes associated with the different SES groups.
+
+![SAS results for Model 2](fls_model_2_results.png)
+
+---
+
+For the reference group (SES 3), the model is:
+
+$$\text{Science Score} = 13.39452 + 0.79304 \times \text{Math}$$
+
+---
+
+For SES 1, the model is:
+
+$$\text{Science Score} = 13.39452 - 4.97305 + (0.79304 + 0.03589) \times \text{Math}$$
+
+$$\text{Science Score} = 8.42147 + 0.82893 \times \text{Math}$$
+
+---
+
+For SES 2, the model is:
+
+$$\text{Science Score} = 13.39452 - 3.19256 + (0.79304 - 0.22650) \times \text{Math}$$
+
+$$\text{Science Score} = 10.20196 + 0.56654 \times \text{Math}$$
+
+---
+
+We can see that the difference in slope between the reference group (SES 3) and SES 1 is very small (0.03589). The difference in slope between the reference group and SES 2 is larger (-0.22650).
+
+## Model 3: Math and Reading
+
+Model 3 introduces the variable of reading scores. 
+
+![SAS results for Model 3](fls_model_3_results.png)
+
+---
+
+The model is:
+
+$$\text{Science Score} = 11.61550 + 0.40172 \times \text{Math} + 0.36542 \times \text{Reading}$$
+
+## Assumptions
+
+Linearity: The scatterplot of residuals vs. predicted values shows a linear relationship.
+Variance: The residual plot appears to show consistent variance.
+Normality: The histogram and Q-Q plot of residuals suggest the residuals are fairly normal.
+
+![Plots for Model 3](fls_model_3_plot.png)
+
+# Takeaways and Questions
+
+## Takeaways
+
+1. A multiple linear regression model is one which models the effects of multiple explanatory variables (x) on a response variable (y).
+2. Categorical variables can be used in a multiple regression model by creating binary levels for each category, which will "remove" the effect of all but one level. This allows us to compare the effect of each level to the reference level.
+3. Interaction terms between two variables can be used to allow for different slopes for the reference lines associated with these levels, which can reveal the effect that the relationship between two explanatory variables has on the response variable.
+
+## Questions
+
+1. I know this is very broad/vague, but what are things that would make us want to look at an interaction? Intuition? Is there an approach to EDA to look for promising interactions, or a test (aside from running all interaction combinations and looking at the results)?
+2. What does this look like with multiple categorical variables, or an immense number of variables (both continuous and categorical)? I'm thinking of a tutorial I saw once about predicting housing prices, they didn't go too far into the math but they did briefly explain that a linear regression model could include. Everything and the kitchen sink, both literally and metaphorically.

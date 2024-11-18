@@ -1,0 +1,395 @@
+---
+title: "Unit 12 Homework"
+author: "Eric Graham"
+date: "2024-11-16"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+```
+
+# Question 1: Crab Claw Force
+
+## 1a: Scatterplot of Force vs. Height and Species
+
+An initial visual examination of the below scatterplot indicates a relatively linear relationship between Height and Force for each species. 
+
+For Hemigrapsus nudus (denoted as H on the plot) there is a positive linear correlation between Height and Force. It is difficult to determine homoscedasticity from the plot, given that the sample is small and there are few data points for low Height values, but variance seems relatively constant throughout the height values and there is no glaring evidence of a violation of heteroscedasticity.
+
+For Cancer productus (denoted as C on the plot) there is a positive linear correlation between Height and Force, and variance appears constant.
+
+For Lophopanopeus bellus (denoted as L on the plot) the correlation between Height and Force appears to be weaker (more of a flat line) than the other species, but variance appears constant. This might make it a good baseline species to compare the other two species to.
+
+![Scatterplot of Force vs. Height and Species](hw_01_01.png)
+
+## 1b: Equations of Linear Regression Model
+
+We chose Lophopanopeus bellus as the reference class, meaning that the line for this species is determined solely by the intercept and the slope for height, without any adjustment for the species indicator variable.
+
+I designated Hemigrapsus nudus as indicator variable "D1" and Cancer productus as indicator variable "D2". 
+
+We want the regression line for each species to have its own slope, so I implemented an interaction between the species variable and height (designated as int1 and int2 in the code). The general model is as follows:
+
+### General Model
+
+$$\text{Force} = \beta_0 + \beta_1 \times \text{Height} + \beta_2 \times d_1 + \beta_3 \times d_2 + \beta_4 \times (\text{Height} \times d_1) + \beta_5 \times (\text{Height} \times d_2)$$
+
+### Regression Lines by Species
+
+### Lophopanopeus bellus (L) as reference class
+
+For *Lophopanopeus bellus*, the indicator variables \(d_1\) and \(d_2\) are both zero, meaning there are no adjustments for the species variable or interaction terms. The regression line is:
+
+$$\text{Force} = \beta_0 + \beta_1 \times \text{Height}$$
+
+### Hemigrapsus nudus (H) as \(d_1\)
+
+For *Hemigrapsus nudus*, the indicator variable \(d_1 = 1\) and \(d_2 = 0\). The regression line includes the main effect of \(d_1\) and its interaction with height:
+
+$$\text{Force} = \beta_0 + \beta_1 \times \text{Height} + \beta_2 \times d_1 + \beta_4 \times (\text{Height} \times d_1)$$
+
+### Cancer productus (C) as \(d_2\)
+
+For *Cancer productus*, the indicator variable \(d_2 = 1\) and \(d_1 = 0\). The regression line includes the main effect of \(d_2\) and its interaction with height:
+
+$$\text{Force} = \beta_0 + \beta_1 \times \text{Height} + \beta_3 \times d_2 + \beta_5 \times (\text{Height} \times d_2)$$
+
+
+## 1c: Fitting the Model
+
+### SAS code and table of parameter estimates
+
+The below code and output shows the results of fitting the model using SAS, which provided the coefficients for each species.
+
+![SAS Code](hw_01_02.png)
+
+![SAS Output](hw_01_03.png)
+
+### Updated General Model with Interaction Terms
+
+We can now update the general model:
+
+$$\text{Force} = \beta_0 + \beta_1 \times \text{Height} + \beta_2 \times d_1 + \beta_3 \times d_2 + \beta_4 \times (\text{Height} \times d_1) + \beta_5 \times (\text{Height} \times d_2)$$
+
+With the parameter estimates from the SAS output:
+
+$$\text{Force} = -17.25249 + 3.84863 \times \text{Height} + 20.41259 \times d_1 + 8.24824 \times d_2 - 3.70383 \times (\text{Height} \times d_1) - 1.16877 \times (\text{Height} \times d_2)$$
+
+
+## 1d: Analysis of Residuals and Appropriateness of Model
+
+### Residual Plot
+
+![](hw_01_04.png)
+
+The residuals do not show a clear pattern, supporting the assumption of constant variance.
+
+### Studentized Residual Plot
+
+![](hw_01_05.png)
+
+Again, the residuals do not show a clear pattern, supporting the assumption of constant variance.
+
+### Histogram of Residuals
+
+![](hw_01_06.png)
+
+The histogram of residuals appears to be normally distributed, showing a generally bell-shaped curve. It is slightly asymmetric, but I would consider this a mild violation given the small sample size.
+
+### QQ Plot of Residuals
+
+![](hw_01_07.png)
+
+The Q-Q plot shows that most of the residuals align closely with the diagonal line, indicating that the residuals are approximately normally distributed. As with the histogram above, deviations at the highest and lowest points suggest potential mild violations of normality.
+
+## 1e: Interpretation of Coefficients
+
+### Intercept (-17.25249):
+
+This represents the hypothetical expected mean force when the height is 0 and the species is Lophopanopeus bellus (the reference class). Since a height of 0 isn't possible (and neither is a negative force, for that matter) this serves merely as a parameter in the model. The p-value of 0.0080 indicates that the intercept is statistically significant at the 95% significance level. We are 95% certain that the true intercept lies between -29.67050 and -4.83448.
+
+### Height (3.84863)
+
+For all species, each one-unit increase in height is associated with an increase of 3.84863 units in the expected mean force, holding the species constant. The p-value of <0.0001 indicates that this effect is statistically significant at the 95% significance level, suggesting that height is a significant predictor of force. We are 95% certain that the true slope lies between 2.37566 and 5.32161.
+
+### D1 (Hemigrapsus nudus) (20.41259)
+
+Hemigrapsus nudus (compared to the reference class, Lophopanopeus bellus) increases the expected mean force by 20.41259 units, assuming the interaction term (Height*D1) is 0. This means this effect applies when height is 0 (which is only a hypothetical value). The p-value of 0.0134 indicates that this effect is statistically significant at the 95% significance level, suggesting that the force produced by Hemigrapsus nudus is different from that of Lophopanopeus bellus. We are 95% certain that the true effect lies between 4.53620 and 36.28899.
+
+### D2 (Cancer productus) (8.24824)
+
+Cancer productus (compared to Lophopanopeus bellus) decreases the expected mean force by 8.24824 units, assuming the interaction term (Height**D2) is 0. Again, this applies when height is 0 (which is only a hypothetical value). The p-value of 0.3865 indicates that this effect is not statistically significant; there is insufficient evidence to suggest that the force production for Cancer productus differs from Lophopanopeus bellus. We are 95% certain that the true effect lies between -10.88692 and 27.38340.
+
+### Height * D1 (-3.70383)
+
+For Hemigrapsus nudus, the effect of height on expected mean force is modified by -3.70383 units, meaning that the slope of the regression line for Hemigrapsus nudus is 3.84863 - 3.70383 = 0.1448. The p-value of 0.0080 indicates that the interaction effect is statistically significant. Thus, the very small slope suggests that there is a very slight relationship between height and expected mean force for Hemigrapsus nudus when compared to Lophopanopeus bellus. We are 95% certain that the true effect lies between -5.61060 and -1.79706.
+
+### Height * D2 (-1.16877)
+
+For Cancer productus, the effect of height on expected mean force is modified by -1.16877 units, meaning that the slope of the regression line for Cancer productus is 3.84863 - 1.16877 = 2.67986. This slope is steeper than that which was observerd for Hemigrapsus nudus, but the p-value of 0.2459 indicates that the interaction effect is not statistically significant. There is insufficient evidence to suggest that the relationship between height and expected mean force for Cancer productus differs from Lophopanopeus bellus. We are 95% certain that the true effect lies between -3.18296 and 0.84542.
+
+## 1f: Individual Regression Equations
+
+By filling in the parameter estimates, we can determine the regression equation for each species, including the interaction terms for height*species66666                              '''''''''''',,,,,,,,,,,,,,,,.
+
+#### Lophopanopeus bellus
+
+$$\text{Force} = -17.25249 + 3.84863 \times \text{Height}$$
+
+#### Hemigrapsus nudus
+
+$$\text{Force} = -17.25249 + 3.84863 \times \text{Height} + 20.41259 - 3.70383 \times \text{Height}$$
+
+This simplifies to:
+
+$$\text{Force} = -17.25249 + 20.41259 + (3.84863 - 3.70383) \times \text{Height}$$
+
+$$\text{Force} = 3.1601 + 0.1448 \times \text{Height}$$
+
+#### Cancer productus
+
+$$\text{Force} = -17.25249 + 3.84863 \times \text{Height} - 8.24824 - 1.16877 \times \text{Height}$$
+
+Which simplifies to:
+
+$$\text{Force} = -17.25249 - 8.24824 + (3.84863 - 1.16877) \times \text{Height}$$
+
+$$\text{Force} = -25.50073 + 2.67986 \times \text{Height}$$
+
+# Question 2: Brain Weight (Step 1)
+
+```{r}
+brains = read.csv("Brain.csv", header = TRUE)
+```
+
+## 2a: Scatterplots and Transformations
+
+### Scatterplot of Brain Weight vs. Body Weight
+
+The relationship here appears to be non-linear, with some extreme outliers.
+
+```{r}
+ggplot(brains, aes(x = Body, y = Brain)) +
+  geom_point() +
+  ggtitle("Brain Size by Body Weight") +
+  theme_few()
+```
+
+### Scatterplot of Brain Weight vs. Litter Size
+
+The distribution is heavily skewed, again with some extreme outliers, and doesn't appear to suggest a linear relationship.
+
+```{r}
+ggplot(brains, aes(x = Litter, y = Brain)) +
+  geom_point() +
+  ggtitle("Brain Size by Litter Size") +
+  theme_few()
+```
+
+
+### Scatterplot of Brain Weight vs. Gestation Time
+
+There is a potential relationship between brain weight and gestation time, but the variance in the response variable increases as the explanatory variable increases.
+
+```{r}
+ggplot(brains, aes(x = Gestation, y = Brain)) +
+  geom_point() +
+  ggtitle("Brain Size by Gestation Time") +
+  theme_few()
+```
+
+All three explantory variables have some violations of the assumptions of linear regression, so I tried log transformations to address them.
+
+```{r}
+brains = brains %>%
+  mutate(
+    log_brain = log(Brain),
+    log_body = log(Body),
+    log_litter = log(Litter),
+    log_gestation = log(Gestation)
+  )
+```
+
+### Log(Brain Weight) vs. Log(Body Weight)
+
+Here we see a much clearer linear relationship and more constant variance.
+
+```{r}
+ggplot(brains, aes(x = log_body, y = log_brain)) +
+  geom_point() +
+  ggtitle("log(Brain) by log(Body)") +
+  theme_few()
+```
+
+### Log(Brain Weight) vs. Log(Litter Size)
+
+Here we see a generally negative linear relationship, and more constant variance.
+
+```{r}
+ggplot(brains, aes(x = log_litter, y = log_brain)) +
+  geom_point() +
+  ggtitle("log(Brain) by log(Litter)") +
+  theme_few()
+```
+
+
+### Log(Brain Weight) vs. Log(Gestation Time)
+
+Here we see a generally positive linear relationship, and generally constant variance (though there is a slight decrease in variance as gestation time increases, but it is much milder than that seen in the untransformed data).
+
+```{r}
+ggplot(brains, aes(x = log_gestation, y = log_brain)) +
+  geom_point() +
+  ggtitle("log(Brain) by log(Gestation)") +
+  theme_few()
+```
+
+
+## 2b: Equations of Linear Regression Model (Step 2)
+
+### General Model
+
+$$\log(\text{Brain Weight}) = \beta_0 + \beta_1 \times \log(\text{Bod yWeight}) + \beta_2 \times \log(\text{Gestation Length}) + \beta_3 \times \log(\text{Litter Size}) + \epsilon$$
+
+## 2c: Fitting the Model (Step 3)
+
+The below code and output shows the results of fitting the model using SAS, which provided the coefficients for each explanatory variable.
+
+```{r}
+brain_model = lm(log_brain ~ log_body + log_litter + log_gestation, data = brains)
+summary(brain_model)
+confint(brain_model)
+```
+
+### Updated general model
+
+By plugging the parameter estimates into the general model, we get the following regression equation:
+
+$$\log(\text{Brain Weight}) = 0.85442 + 0.57507 \times \log(\text{Body Weight}) + 0.41794 \times \log(\text{Gestation Length}) - 0.31007 \times \log(\text{Litter Size}) + \epsilon$$
+
+Which can be updated to not include Epsilon, for our fitted regression equation:
+
+$$\log(\text{Brain Weight}) = 0.85442 + 0.57507 \times \log(\text{Body Weight}) + 0.41794 \times \log(\text{Gestation Length}) - 0.31007 \times \log(\text{Litter Size})$$
+
+## 2d: Analysis of Residuals and Appropriateness of Model (Step 4)
+
+```{r}
+residuals_data = data.frame(
+  residuals = resid(brain_model),
+  studentized_residuals = rstudent(brain_model),
+  fitted_values = fitted(brain_model)
+)
+```
+
+### Residual Plot
+
+```{r}
+ggplot(residuals_data, aes(x = fitted_values, y = residuals)) +
+  geom_point() +
+  ggtitle("Residuals vs Fitted Values") +
+  theme_few()
+```
+
+The residuals do not show a clear pattern, supporting the assumption of constant variance.
+
+### Studentized Residual Plot
+
+```{r}
+ggplot(residuals_data, aes(x = fitted_values, y = studentized_residuals)) +
+  geom_point() +
+  ggtitle("Studentized Residuals vs Fitted Values") +
+  theme_few()
+```
+
+Again, the residuals do not show a clear pattern, supporting the assumption of constant variance.
+
+### Histogram of Residuals
+
+```{r}
+ggplot(residuals_data, aes(x = residuals)) +
+  geom_histogram(binwidth = 0.5, fill = "blue", color = "black", aes(y = ..density..)) +
+  stat_function(fun = dnorm, args = list(mean = mean(residuals_data$residuals), sd = sd(residuals_data$residuals)), color = "red", size = 1) +
+  ggtitle("Histogram of Residuals with Normal Curve") +
+  theme_few()
+```
+
+The histogram of residuals appears to be normally distributed. It is slightly right-skewed, but I would consider this a mild violation.
+
+### QQ Plot of Residuals
+
+```{r}
+ggplot(residuals_data, aes(sample = residuals)) +
+  stat_qq() +
+  stat_qq_line() +
+  ggtitle("QQ Plot of Residuals") +
+  theme_few()
+```
+
+The Q-Q plot shows that most of the residuals align closely with the diagonal line, indicating that the residuals are approximately normally distributed. There are some mild deviations at the tails, but not enough to suggest that the model is inappropriate.
+
+## 2e: Interpretation of Coefficients (Step 5)
+
+### Intercept (0.85442)
+
+When all explanatory variables have a log-transformed value of 0, the expected log of brain weight is 0.85442. Obviously, this is purely a hypothetical value that is used as a parameter in our model. The p-value of 0.1996 indicates that the intercept is not statistically significant at the 95% significance level. We are 95% certain that the true intercept is between -0.4593167 and 2.16896055.
+
+### Body Weight (0.57507)
+
+A doubling of body weight is associated with a 2^0.57507 (approximately 48.97%) increase in expected brain weight, holding other factors constant. The p-value of < 2e-16 indicates that this coefficient is statistically significant. We are 95% certain that the true slope is between 0.5103490 and 0.63979373.
+
+### Gestation Time  (0.41794):
+
+A doubling of gestation length is associated with a 2^0.41794 (approximately 33.6%) increase in the expected brain weight, holding other factors constant. The p-value of 0.00381 indicates that this slope is statistically significant. We are 95% certain that the true slope is between -0.5403124 and -0.07982996. 
+
+### Litter Size (-0.31007)
+
+A doubling of litter size is associated with a 2^-0.31007 (approximately 19.34%) decrease in the median brain weight, holding other factors constant. The p-value of 0.00885 indicates that this slope is statistically significant. We are 95% certain that the true slope is between 0.1383359 and 0.69754827.
+
+# 3: Bonus Questions
+
+## 3a: Degrees of Freedom for Question 1
+
+The model for question one has six parameters and 38 observations, so the degrees of freedom for the residuals is 32. This is also shown in the SAS output.
+
+## 3b: Estimated MSE in Question 1
+
+The estimated MSE (which is shown in the SAS output) is 19.76087.
+
+## 3c: Question 1a in R
+
+```{r}
+crabs = read.csv("Crab17.csv", header = TRUE)
+ggplot(crabs, aes(x = Height, y = Force, color = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Force by Height and Species") +
+  theme_few()
+```
+
+## 3d: Question 1c in R
+
+```{r}
+crabs$Species = as.factor(crabs$Species)
+crabs$Species = relevel(crabs$Species, ref = "Lophopanopeus bellus")
+model2 = lm(Force ~ Height + Species + Height:Species, data = crabs)
+summary(model2)
+confint(model2)
+```
+
+## 3e: Degrees of Freedom for Question 2
+
+The model for question two has four parameters and 96 observations, so the degrees of freedom for the residuals is 92. This is also shown in the R output.
+
+## 3f: Estimated MSE in Question 2
+
+I calculated the MSE to be 0.2253921.
+
+```{r}
+mse_1 = sum(residuals(brain_model)^2) / brain_model$df.residual
+mse_1
+```
+

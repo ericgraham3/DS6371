@@ -1,0 +1,90 @@
+---
+title: "Unit 13 FLS"
+author: "Eric Graham"
+date: "2024-11-21"
+output: 
+  powerpoint_presentation:
+    slide_level: 2
+    reference_doc: presentation.pptx
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, results = "hide")
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(scales)
+```
+
+# QQQ
+
+## Answers
+
+1. A
+2. A
+3. D
+4. C
+
+# Question 1: Age, Weight, and Systolic Blood Pressure
+
+## Scatterplot Analysis
+
+* Age and weight appear to have a slight positive correlation (I can anecdotally confirm this).
+* There appears to be a very strong positive relationship between age and systolic blood pressure.
+* There appears to be a moderate relationship between weight and systolic blood pressure.
+
+## Statistical Significance of Relationships
+
+According to the SAS output, age and weight are statistically significant predictors of systolic blood pressure: the p-values for both slopes are less than 0.05.
+
+![SAS output](FLS_05.png)
+
+## Equation of Regression Line
+
+By plugging in the parameter estimates from SAS, we arrive at this regression equation:
+
+$$\text{Blood Pressure (SBP)} = -28.0464 + 2.16095(\text{Age}) + 0.48969(\text{Weight})$$
+
+## Interpretation of Coefficients
+
+### Intercept (-28.0464)
+
+This is the expected mean systolic blood pressure when both age and weight are zero. That isn't practically possible, but it's a parameter for our model. The high p-value (0.3251) indicates that this intercept is not statistically significant.
+
+### Age (2.16095)
+
+For each additional year of age, expected mean systolic blood pressure increases by approximately 2.16 units, holding weight constant. The p-value (0.0001) indicates that this relationship is statistically significant.
+
+### Weight (0.48969)
+
+For each additional unit of weight, expected mean systolic blood pressure increases by approximately 0.49 units, holding age constant. The p-value (0.0142) indicates that this relationship is statistically significant.
+
+## Manual Calculation of Test Statistic
+
+### T-Stat for Age
+
+$$t_{\text{age}} = \frac{\beta_{\text{age}}}{\text{SE}_{\text{age}}} = \frac{2.16095}{0.47486} = 4.55$$
+
+### T-Stat for Weight
+
+$$t_{\text{weight}} = \frac{\beta_{\text{weight}}}{\text{SE}_{\text{weight}}} = \frac{0.48969}{0.18670} = 2.62$$
+
+## Residual Analysis
+
+* Normality: the histogram and qq-plot show an approximately normal distribution of residuals.
+* Variance: the residual plot shows a random scatter of the residual values, with no clear pattern.
+* Linearity: as with variance, the residual plot shows no clear pattern, which indicates that the relationship is linear.
+
+# Takeaways and Questions
+
+## Takeaways
+
+* Polynomial regression can be used to model relationships that are not linear.
+* Adjusted r-squared is the preferred metric for multiple linear regression models, as it accounts for the number of predictors (as well as sample size). But overrliance on adjusted r-squared leaves you open to overfitting (more on that below). 
+* Including too many explantory variables can lead to overfitting, which makes the model less generally useful outside that data set.
+* Isolating one variable while holding others constant can lead to a more accurate assessment of the impact of that isolated variable.determine whether additional variables improve the model.
+
+## Questions
+
+* I feel good about the async, looking forward to the lecture!
+* I'm sure I'm not alone in being curious about the upcoming project!

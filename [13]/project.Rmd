@@ -1,0 +1,121 @@
+title: "Housing Prices Project"
+author: "Eric Graham"
+date: "2024-11-21"
+output: word_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(scales)
+library(car)
+library(skimr)
+```
+
+```{r}
+df = read.csv("train.csv")
+
+filtered_data = df %>%
+  filter(Neighborhood %in% c("NAmes", "Edwards", "BrkSide")) %>%
+  mutate(GrLivArea = GrLivArea / 100)
+vars_of_interest = c("GrLivArea", "SalePrice", "Neighborhood")
+filtered_data = filtered_data[vars_of_interest]
+filtered_data = filtered_data %>% 
+  mutate(LogSalePrice = log(SalePrice)) %>% 
+  mutate(log_GrLivArea = log(GrLivArea))
+skim(filtered_data)
+```
+
+```{r}
+ggplot(filtered_data, aes(x = SalePrice)) +
+  geom_histogram(bins = 30, fill = "blue", color = "white") +
+  labs(title = "Distribution of Sale Prices") + 
+  theme_few()
+
+ggplot(filtered_data, aes(x = LogSalePrice)) +
+  geom_histogram(bins = 30, fill = "green", color = "white") +
+  labs(title = "Distribution of Log-Transformed Sale Prices") + 
+  theme_few()
+```
+
+```{r}
+ggplot(filtered_data, aes(x = GrLivArea)) +
+  geom_histogram(bins = 30, fill = "orange", color = "white") +
+  labs(title = "Distribution of Living Area (GrLivArea)") + 
+  theme_few()
+
+ggplot(filtered_data, aes(x = log(GrLivArea))) +
+  geom_histogram(bins = 30, fill = "purple", color = "white") +
+  labs(title = "Distribution of Log-Transformed Living Area") + 
+  theme_few()
+```
+
+```{r}
+ggplot(filtered_data, aes(x = Neighborhood, y = SalePrice, fill = Neighborhood)) +
+  geom_boxplot() +
+  labs(title = "Sale Price by Neighborhood") + 
+  theme_few()
+
+ggplot(filtered_data, aes(x = Neighborhood, y = LogSalePrice, fill = Neighborhood)) +
+  geom_boxplot() +
+  labs(title = "Log-Transformed Sale Price by Neighborhood") + 
+  theme_few()
+
+ggplot(filtered_data, aes(x = Neighborhood, y = GrLivArea, fill = Neighborhood)) +
+  geom_boxplot() +
+  labs(title = "Living Area by Neighborhood") + 
+  theme_few()
+
+ggplot(filtered_data, aes(x = Neighborhood, y = log_GrLivArea, fill = Neighborhood)) +
+  geom_boxplot() +
+  labs(title = "Log-Transformed Living Area by Neighborhood") + 
+  theme_few()
+```
+
+```{r}
+ggplot(filtered_data, aes(x = GrLivArea, y = SalePrice, color = Neighborhood)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Sale Price vs. Living Area by Neighborhood") +
+  theme_few()
+
+ggplot(filtered_data, aes(x = log(GrLivArea), y = LogSalePrice, color = Neighborhood)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Log Sale Price vs. Log Living Area by Neighborhood") +
+  theme_few()
+```
+
+
+```{r}
+model = lm(SalePrice ~ GrLivArea * Neighborhood, data = filtered_data)
+
+par(mfrow = c(2, 2))
+plot(model)
+
+influencePlot(model)
+
+summary(model)
+
+confint(model)
+```
+
+```{r}
+model = lm(LogSalePrice ~ log_GrLivArea * Neighborhood, data = filtered_data)
+
+par(mfrow = c(2, 2))
+plot(model)
+
+influencePlot(model)
+
+summary(model)
+
+confint(model)
+```
+
+```{r}
+# Remove influential points
+filtered_data_no_influential = filtered_data[-c(339, 736), ]
+refined_model = lm(LogSalePrice ~ log_GrLivArea * Neighborhood, data = filtered_data_no_influential)
+summary(refined_model)
+```

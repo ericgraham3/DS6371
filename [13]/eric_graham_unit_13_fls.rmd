@@ -20,7 +20,7 @@ library(scales)
 
 ## Answers
 
-1. A
+1. A (should be d)
 2. A
 3. D
 4. C
